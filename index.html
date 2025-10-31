@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pantalla Informativa - Cumpleaños</title>
+  <style>
+    body {
+      font-family: "Poppins", "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+      color: #111;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 99vh;
+      margin: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* 🔺 Triángulo negro y logo */
+    .corner-triangle {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 280px solid #000;
+      border-bottom: 230px solid transparent;
+      z-index: 2;
+    }
+
+    .logo {
+      position: fixed;
+      top: 35px;
+      left: 45px;
+      width: 110px;
+      height: auto;
+      z-index: 3;
+      animation: floatLogo 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatLogo {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(6px); opacity: 0.9; }
+    }
+
+    /* 🔶 Triángulo amarillo */
+    .corner-triangle-yellow {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 0;
+      height: 0;
+      border-right: 200px solid #FFD60A;
+      border-top: 180px solid transparent;
+      z-index: 1;
+    }
+
+    /* 🎉 Contenedor principal */
+    .container {
+      text-align: center;
+      z-index:5;
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 🎂 Título */
+    .title {
+      font-size: 2.7rem;
+      font-weight: 700;
+      color: #000;
+      text-shadow: 0 0 10px rgba(255, 214, 10, 0.4);
+      margin-bottom: 50px;
+      animation: fadeSlide 1s ease;
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 🖼 Imagen */
+    .photo {
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 6px solid #FFD60A;
+      box-shadow: 0 0 30px rgba(255, 214, 10, 0.4);
+      margin-bottom: -100px;
+      z-index: 6;
+      position: relative;
+      animation: floatImg 5s ease-in-out infinite;
+    }
+
+    @keyframes floatImg {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* 💬 Card con nombre y mensaje */
+    .info-card {
+      background: #fff;
+      border-radius: 25px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      width: 500px;
+      padding: 90px 30px 40px;
+      margin-top: 1px;
+      position: relative;
+      z-index: 5;
+      border: 2px solid #eee;
+      animation: fadeUp 1s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .nombre {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #000;
+      margin-top: 20px;
+    }
+
+    .mensaje {
+      font-size: 1.2rem;
+      color: #555;
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    /* 🎊 Confeti */
+    canvas#confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+  <div class="corner-triangle"></div>
+  <div class="corner-triangle-yellow"></div>
+  <img src="img/logo.png" alt="Logo LUM" class="logo">
+
+  <div class="container" id="contenedor">
+    <h1 class="title">🎂 ¡Feliz Cumpleaños!</h1>
+    <p>Cargando...</p>
+  </div>
+
+  <script>
+    const TSV_URL =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
+    let datos = [];
+    let index = 0;
+
+    async function cargarDatos() {
+      const cont = document.getElementById("contenedor");
+      try {
+        const res = await fetch(`${TSV_URL}&nocache=${Date.now()}`, { cache: "no-store" });
+        const text = await res.text();
+        const filas = text.trim().split("\n").slice(1);
+        const esTSV = text.includes("\t");
+
+        datos = filas.map(linea => {
+          const partes = esTSV ? linea.split("\t") : linea.split(",");
+          return {
+            nombre: partes[0]?.trim() || "",
+            mensaje: partes[1]?.trim() || "",
+            imagen: partes[2]?.trim() || ""
+          };
+        });
+
+        if (datos.length > 0) mostrarActual();
+        else cont.innerHTML = `<h1 class="title">🎂 ¡Feliz Cumpleaños!</h1><p>No hay datos disponibles.</p>`;
+      } catch (err) {
+        console.error(err);
+        cont.innerHTML = `<h1 class="title">🎂 ¡Feliz Cumpleaños!</h1><p>Error al cargar datos 😔</p>`;
+      }
+    }
+
+    function mostrarActual() {
+      const cont = document.getElementById("contenedor");
+      const item = datos[index];
+      cont.innerHTML = `
+        <h1 class="title">🎂 ¡Feliz Cumpleaños!</h1>
+        <img src="${item.imagen}" alt="${item.nombre}" class="photo">
+        <div class="info-card">
+          <div class="nombre">${item.nombre}</div>
+          <div class="mensaje">${item.mensaje}</div>
+        </div>
+      `;
+      lanzarConfeti();
+      index = (index + 1) % datos.length;
+    }
+
+    function lanzarConfeti() {
+      const canvas = document.getElementById("confetti");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const particles = [];
+
+      for (let i = 0; i < 60; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * -canvas.height,
+          r: Math.random() * 6 + 2,
+          d: Math.random() * 20 + 10,
+          color: `hsl(${Math.random() * 60 + 40}, 100%, 50%)`,
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const p of particles) {
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x, p.y, p.r, p.r);
+          p.y += Math.cos(p.d) + 2;
+          p.x += Math.sin(p.d);
+          if (p.y > canvas.height) p.y = 0;
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+      setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 3000);
+    }
+
+    cargarDatos();
+    setInterval(mostrarActual, 9000);
+    setInterval(cargarDatos, 30000);
+  </script>
+</body>
+</html>
