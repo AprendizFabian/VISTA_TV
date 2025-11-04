@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pantalla Informativa - Cumpleaños</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <style>
+    body {
+      font-family: "Poppins", "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+      color: #111;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .corner-triangle {
+      position: fixed;
+      top: 0;
+      left: 0;
+      border-left: 280px solid #000;
+      border-bottom: 230px solid transparent;
+      z-index: 2;
+    }
+
+    .logo {
+      position: fixed;
+      top: 30px;
+      left: 40px;
+      width: 110px;
+      z-index: 3;
+      animation: floatLogo 1s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatLogo {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(6px); }
+    }
+
+    .corner-triangle-yellow {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      border-right: 200px solid #FFD60A;
+      border-top: 180px solid transparent;
+      z-index: 1;
+    }
+
+    .container { text-align: center; z-index: 5; animation: fadeIn 1s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .title {
+      font-size: 2.7rem;
+      font-weight: 700;
+      color: #000;
+      margin-bottom: 50px;
+    }
+
+    .photo {
+      width: 250px; height: 250px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 6px solid #FFD60A;
+      margin-bottom: -100px;
+      z-index: 6;
+      animation: floatImg 5s ease-in-out infinite;
+    }
+
+    @keyframes floatImg {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .info-card {
+      background: #fff;
+      border-radius: 25px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      width: 500px;
+      padding: 90px 30px 40px;
+      border: 2px solid #eee;
+    }
+
+    .nombre { font-size: 1.8rem; font-weight: 700; color: #000; }
+    .mensaje { font-size: 1.2rem; color: #555; margin-top: 8px; font-style: italic; }
+
+    canvas#confetti {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;        /* 🔥 Va detrás de todo */
+  background: none;   /* 🔥 Asegura transparencia */
+}
+
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+  <div class="corner-triangle"></div>
+  <div class="corner-triangle-yellow"></div>
+  <img src="img/logo.png" alt="Logo LUM" class="logo">
+
+  <div class="container" id="contenedor">
+    <h1 class="title">🎂 ¡Feliz Cumpleaños!</h1>
+    <p>Cargando...</p>
+  </div>
+
+  <script>
+    const TSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
+    let datos = [];
+    let index = 0;
+
+    async function cargarDatos() {
+      const cont = document.getElementById("contenedor");
+      try {
+        // ✅ Corregido: se usa & en lugar de ?
+        const res = await fetch(`${TSV_URL}&time=${Date.now()}`, { cache: "no-store" });
+        const text = await res.text();
+
+        if (!text.trim()) throw new Error("Archivo vacío o no accesible");
+
+        const filas = text.trim().split("\n").slice(1);
+        datos = filas.map(linea => {
+          const partes = linea.split("\t");
+          return {
+            nombre: partes[0]?.trim() || "",
+            mensaje: partes[1]?.trim() || "",
+            imagen: partes[2]?.trim() || ""
+          };
+        });
+
+        if (datos.length > 0) mostrarActual();
+        else cont.innerHTML = `<h1 class="title">🎂 ¡Feliz Cumpleaños!</h1><p>No hay datos disponibles.</p>`;
+      } catch (err) {
+        console.error("⚠️ Error:", err);
+        cont.innerHTML = `<h1 class="title">🎂 ¡Feliz Cumpleaños!</h1><p>Error al cargar datos 😔</p>`;
+      }
+    }
+
+    function mostrarActual() {
+      const cont = document.getElementById("contenedor");
+      const item = datos[index];
+      cont.innerHTML = `
+        <h1 class="title">🎂 ¡Feliz Cumpleaños!</h1>
+        <img src="${item.imagen}&t=${Date.now()}" alt="${item.nombre}" class="photo">
+        <div class="info-card">
+          <div class="nombre">${item.nombre}</div>
+          <div class="mensaje">${item.mensaje}</div>
+        </div>
+      `;
+      lanzarConfeti();
+      index = (index + 1) % datos.length;
+    }
+
+    function lanzarConfeti() {
+      const canvas = document.getElementById("confetti");
+      const ctx = canvas.getContext("2d");
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+      const p = [];
+      for (let i = 0; i < 60; i++) p.push({ x: Math.random()*canvas.width, y: -Math.random()*canvas.height, r: Math.random()*6+2, d: Math.random()*20+10, c: `hsl(${Math.random()*60+40},100%,50%)` });
+      function draw(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        for(const e of p){ ctx.fillStyle=e.c; ctx.fillRect(e.x,e.y,e.r,e.r); e.y+=Math.cos(e.d)+2; e.x+=Math.sin(e.d); if(e.y>canvas.height)e.y=0; }
+        requestAnimationFrame(draw);
+      }
+      draw();
+      setTimeout(()=>ctx.clearRect(0,0,canvas.width,canvas.height),3000);
+    }
+
+    cargarDatos();
+    setInterval(mostrarActual, 9000);
+    setInterval(cargarDatos, 25000);
+  </script>
+</body>
+</html>
