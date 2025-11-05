@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🏆 Empleado del Mes - LUM</title>
+  <title>Empleado del Mes - LUM</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-
     body {
       margin: 0;
       font-family: "Poppins", sans-serif;
@@ -19,7 +17,6 @@
       color: #111;
       position: relative;
     }
-
     .corner-black {
       position: absolute;
       top: 0; left: 0;
@@ -28,7 +25,6 @@
       border-bottom: 230px solid transparent;
       z-index: 1;
     }
-
     .corner-yellow {
       position: absolute;
       bottom: 0; right: 0;
@@ -37,85 +33,30 @@
       border-top: 180px solid transparent;
       z-index: 1;
     }
-
     .logo {
       position: absolute;
       top: 30px; left: 40px;
       width: 100px;
-      z-index: 10;
       animation: floatLogo 3s ease-in-out infinite alternate;
+      z-index: 10;
     }
-
-    @keyframes floatLogo {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(6px); }
-    }
-
+    @keyframes floatLogo {0%{transform:translateY(0);}100%{transform:translateY(6px);}}
     .container {
       text-align: center;
       z-index: 5;
       animation: fadeIn 1.2s ease;
     }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(40px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .title {
-      font-size: 2.6rem;
-      font-weight: 700;
-      color: #FFD60A;
-      text-shadow: 0 0 10px rgba(255, 214, 10, 0.4);
-      margin-bottom: 25px;
-      animation: bounceIn 1s ease;
-    }
-
-    @keyframes bounceIn {
-      0% { transform: scale(0.8); opacity: 0; }
-      60% { transform: scale(1.05); opacity: 1; }
-      100% { transform: scale(1); }
-    }
-
+    @keyframes fadeIn {from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
+    .title {font-size:2.6rem;font-weight:700;color:#FFD60A;text-shadow:0 0 10px rgba(255,214,10,0.4);}
     .photo {
-      width: 240px;
-      height: 240px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 6px solid #FFD60A;
-      box-shadow: 0 0 30px rgba(255,214,10,0.4);
+      width:240px;height:240px;border-radius:50%;object-fit:cover;
+      border:6px solid #FFD60A;box-shadow:0 0 30px rgba(255,214,10,0.4);
       animation: floatImg 4s ease-in-out infinite;
-      background: #fff;
     }
-
-    @keyframes floatImg {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-
-    .nombre {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #000;
-      margin-top: 25px;
-    }
-
-    .mensaje {
-      font-size: 1.2rem;
-      color: #555;
-      font-style: italic;
-      margin-top: 8px;
-    }
-
-    canvas#confetti {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
+    @keyframes floatImg {0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+    .nombre {font-size:2rem;font-weight:700;margin-top:25px;}
+    .mensaje {font-size:1.2rem;color:#555;font-style:italic;margin-top:8px;}
+    canvas#confetti {position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
   </style>
 </head>
 <body>
@@ -123,17 +64,13 @@
   <div class="corner-black"></div>
   <div class="corner-yellow"></div>
   <img src="img/logo.png" alt="Logo LUM" class="logo">
-
-  <div class="container" id="contenedor">
-    <h1 class="title">🏆 Empleado del Mes</h1>
-    <p>Cargando...</p>
-  </div>
+  <div class="container" id="contenedor"><h1 class="title">🏆 Empleado del Mes</h1><p>Cargando...</p></div>
 
   <script>
-    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?output=tsv";
+    const SHEET_URL =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
     const tienda = new URLSearchParams(window.location.search).get("tienda");
     const cont = document.getElementById("contenedor");
-
     const RANGOS = {
       DS_SIERRA: { filaEmpleado: 23, columnas: [0, 1, 2] },
       DS_CHAPINERO: { filaEmpleado: 23, columnas: [5, 6, 7] }
@@ -145,70 +82,51 @@
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
         const conf = RANGOS[tienda];
-
-        if (!conf) return cerrarPantalla();
+        if (!conf) return siguientePantalla();
 
         const fila = filas[conf.filaEmpleado] || [];
-        const empleado = {
+        const e = {
           nombre: fila[conf.columnas[0]]?.trim(),
           mensaje: fila[conf.columnas[1]]?.trim(),
           imagen: fila[conf.columnas[2]]?.trim()
         };
 
-        // ❌ Si no hay datos válidos, ni muestra nada
-        if (!empleado.nombre && !empleado.mensaje && !empleado.imagen) {
-          cerrarPantalla();
-          return;
-        }
+        if (!e.nombre && !e.mensaje && !e.imagen) return siguientePantalla();
 
         cont.innerHTML = `
           <h1 class="title">🏆 Empleado del Mes</h1>
-          <img src="${empleado.imagen}" alt="${empleado.nombre}" class="photo">
-          <div class="nombre">${empleado.nombre}</div>
-          <div class="mensaje">${empleado.mensaje || "Por su excelente desempeño"}</div>
-        `;
+          <img src="${e.imagen}" alt="${e.nombre}" class="photo">
+          <div class="nombre">${e.nombre}</div>
+          <div class="mensaje">${e.mensaje || "Por su excelente desempeño"}</div>`;
         lanzarConfeti();
       } catch (err) {
-        console.error(err);
-        cerrarPantalla();
+        siguientePantalla();
       }
     }
 
-    function cerrarPantalla() {
-      // Si se ejecuta en navegador (TV), mejor redirigir a una pantalla neutra
-      window.location.href = "blank.html";
+    function siguientePantalla() {
+      window.location.href = `motivacional.html?tienda=${encodeURIComponent(tienda)}`;
     }
 
     function lanzarConfeti() {
       const canvas = document.getElementById("confetti");
       const ctx = canvas.getContext("2d");
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      const particles = Array.from({ length: 60 }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * -canvas.height,
-        r: Math.random() * 6 + 2,
-        d: Math.random() * 20 + 10,
-        color: `hsl(${Math.random() * 60 + 40}, 100%, 50%)`
+      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+      const p = Array.from({ length: 60 }, () => ({
+        x: Math.random()*canvas.width, y: Math.random()*-canvas.height,
+        r: Math.random()*6+2, d: Math.random()*20+10,
+        color: `hsl(${Math.random()*60+40},100%,50%)`
       }));
-
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (const p of particles) {
-          ctx.fillStyle = p.color;
-          ctx.fillRect(p.x, p.y, p.r, p.r);
-          p.y += Math.cos(p.d) + 2;
-          p.x += Math.sin(p.d);
-          if (p.y > canvas.height) p.y = 0;
-        }
+      (function draw(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        for(const o of p){ctx.fillStyle=o.color;ctx.fillRect(o.x,o.y,o.r,o.r);
+          o.y+=Math.cos(o.d)+2;o.x+=Math.sin(o.d);if(o.y>canvas.height)o.y=0;}
         requestAnimationFrame(draw);
-      }
-      draw();
-      setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 4000);
+      })();
     }
 
     cargarEmpleado();
-    setTimeout(() => window.location.href = `cumple.html?tienda=${encodeURIComponent(tienda)}`, 30000);
+    setTimeout(siguientePantalla, 30000);
   </script>
 </body>
 </html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌟 Mensaje Motivacional - LUM</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      background: radial-gradient(circle, #fff 0%, #f3f3f3 100%);
+      font-family: 'Poppins', sans-serif;
+      color: #111;
+      text-align: center;
+      overflow: hidden;
+    }
+    h1 {
+      color: #FFD60A;
+      font-size: 2.6rem;
+      animation: fadeIn 1.5s ease;
+    }
+    .mensaje {
+      font-size: 1.8rem;
+      font-style: italic;
+      max-width: 700px;
+      margin-top: 30px;
+      line-height: 1.5;
+      animation: floatIn 2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes floatIn {
+      0% { opacity: 0; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .autor {
+      margin-top: 15px;
+      font-size: 1rem;
+      color: #777;
+    }
+    .logo {
+      position: absolute;
+      top: 30px; left: 30px;
+      width: 90px;
+      animation: float 3s ease-in-out infinite alternate;
+    }
+    @keyframes float {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(6px); }
+    }
+  </style>
+</head>
+<body>
+  <img src="img/logo.png" class="logo">
+  <h1>🌟 Mensaje del Día</h1>
+  <div class="mensaje" id="mensaje">Cargando...</div>
+  <div class="autor" id="autor"></div>
+
+  <script>
+    const MOTIVACIONAL_URL =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=123456789&single=true&output=tsv";
+
+    async function cargarFrase() {
+      try {
+        const res = await fetch(`${MOTIVACIONAL_URL}&nocache=${Date.now()}`);
+        const text = await res.text();
+        const filas = text.trim().split("\n").map(f => f.split("\t"));
+        const frases = filas.slice(1).filter(f => f[0]); // evita encabezado vacío
+        if (frases.length === 0) {
+          document.getElementById("mensaje").textContent = "Sin mensajes disponibles.";
+          return;
+        }
+        const aleatoria = frases[Math.floor(Math.random() * frases.length)];
+        document.getElementById("mensaje").textContent = `"${aleatoria[0]}"`;
+        document.getElementById("autor").textContent = aleatoria[1] ? `— ${aleatoria[1]}` : "";
+      } catch (e) {
+        document.getElementById("mensaje").textContent = "⚠️ Error al cargar mensaje.";
+      }
+    }
+
+    cargarFrase();
+
+    setTimeout(() => window.location.href = "cumple.html", 30000);
+  </script>
+</body>
+</html>
