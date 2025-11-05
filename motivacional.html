@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🌟 Mensaje Motivacional - LUM</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
     body {
       margin: 0;
       height: 100vh;
@@ -12,59 +14,86 @@
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      background: radial-gradient(circle, #fff 0%, #f3f3f3 100%);
+      background: radial-gradient(circle, #ffffff 0%, #f5f5f5 100%);
       font-family: 'Poppins', sans-serif;
       color: #111;
       text-align: center;
       overflow: hidden;
+      position: relative;
     }
+
     h1 {
       color: #FFD60A;
-      font-size: 2.6rem;
+      font-size: 2.8rem;
       animation: fadeIn 1.5s ease;
+      text-shadow: 0 0 10px rgba(255,214,10,0.3);
     }
+
     .mensaje {
-      font-size: 1.8rem;
+      font-size: 1.9rem;
       font-style: italic;
       max-width: 700px;
-      margin-top: 30px;
+      margin-top: 40px;
       line-height: 1.5;
-      animation: floatIn 2s ease;
+      animation: floatIn 1.8s ease;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes floatIn {
-      0% { opacity: 0; transform: scale(0.9); }
-      100% { opacity: 1; transform: scale(1); }
-    }
+
     .autor {
-      margin-top: 15px;
+      margin-top: 20px;
       font-size: 1rem;
       color: #777;
+      animation: fadeIn 2s ease;
     }
+
     .logo {
       position: absolute;
       top: 30px; left: 30px;
       width: 90px;
       animation: float 3s ease-in-out infinite alternate;
     }
+
     @keyframes float {
       0% { transform: translateY(0); }
       100% { transform: translateY(6px); }
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes floatIn {
+      0% { opacity: 0; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* 💫 Fondo dinámico */
+    .glow {
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,214,10,0.4), transparent 70%);
+      filter: blur(60px);
+      animation: moveGlow 8s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+
+    @keyframes moveGlow {
+      0% { top: 10%; left: 10%; }
+      100% { top: 60%; left: 60%; }
+    }
   </style>
 </head>
 <body>
-  <img src="img/logo.png" class="logo">
+  <div class="glow"></div>
+  <img src="img/logo.png" class="logo" alt="Logo LUM">
   <h1>🌟 Mensaje del Día</h1>
   <div class="mensaje" id="mensaje">Cargando...</div>
   <div class="autor" id="autor"></div>
 
   <script>
     const MOTIVACIONAL_URL =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=123456789&single=true&output=tsv";
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=TU_GID_DE_MOTIVACIONAL&single=true&output=tsv";
 
     async function cargarFrase() {
       try {
@@ -72,20 +101,24 @@
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
         const frases = filas.slice(1).filter(f => f[0]); // evita encabezado vacío
+
         if (frases.length === 0) {
-          document.getElementById("mensaje").textContent = "Sin mensajes disponibles.";
+          window.location.href = "cumple.html";
           return;
         }
+
         const aleatoria = frases[Math.floor(Math.random() * frases.length)];
         document.getElementById("mensaje").textContent = `"${aleatoria[0]}"`;
         document.getElementById("autor").textContent = aleatoria[1] ? `— ${aleatoria[1]}` : "";
       } catch (e) {
         document.getElementById("mensaje").textContent = "⚠️ Error al cargar mensaje.";
+        console.error(e);
       }
     }
 
     cargarFrase();
 
+    // ⏱️ Después de 30 segundos, volver a cumpleaños
     setTimeout(() => window.location.href = "cumple.html", 30000);
   </script>
 </body>
