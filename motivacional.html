@@ -81,10 +81,11 @@
   <div class="autor" id="autor"></div>
 
   <script>
-    // URL de la hoja motivacional (asegúrate de que el GID sea el correcto)
+    // 👉 URL pública de la hoja MOTIVACIONAL (ajusta el gid de esa pestaña)
     const MOTIVACIONAL_URL =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=MOTIVACIONAL_GID&single=true&output=tsv";
 
+    // Extrae el parámetro de tienda para mantener el ciclo
     const tienda = new URLSearchParams(window.location.search).get("tienda");
 
     async function cargarFrase() {
@@ -92,22 +93,26 @@
         const res = await fetch(`${MOTIVACIONAL_URL}&nocache=${Date.now()}`);
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
-        const frases = filas.slice(1).filter(f => f[0]?.trim());
+
+        // 🧠 Toma filas desde A2:B50 (omite encabezados vacíos)
+        const frases = filas.slice(1, 50).filter(f => f[0]?.trim());
 
         if (frases.length === 0) {
-          console.warn("Sin mensajes motivacionales");
+          console.warn("Sin mensajes motivacionales.");
           setTimeout(() => window.location.href = `cumple.html?tienda=${encodeURIComponent(tienda)}`, 2000);
           return;
         }
 
+        // 🎯 Escoge una frase aleatoria
         const aleatoria = frases[Math.floor(Math.random() * frases.length)];
-        document.getElementById("mensaje").textContent = `"${aleatoria[0]}"`;
-        document.getElementById("autor").textContent = aleatoria[1] ? `— ${aleatoria[1]}` : "";
 
-        // Espera 30s y pasa a cumpleaños
+        document.getElementById("mensaje").textContent = `"${aleatoria[0].trim()}"`;
+        document.getElementById("autor").textContent = aleatoria[1] ? `— ${aleatoria[1].trim()}` : "";
+
+        // ⏱️ Después de 30 segundos → vuelve a cumpleaños
         setTimeout(() => window.location.href = `cumple.html?tienda=${encodeURIComponent(tienda)}`, 30000);
       } catch (e) {
-        console.error("Error al cargar mensaje:", e);
+        console.error("Error al cargar motivacional:", e);
         setTimeout(() => window.location.href = `cumple.html?tienda=${encodeURIComponent(tienda)}`, 3000);
       }
     }
