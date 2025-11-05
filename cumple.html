@@ -124,8 +124,6 @@
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
         const conf = RANGOS[tienda];
-
-        // Si no se seleccionó tienda, redirige directo
         if (!conf) return siguientePantalla();
 
         // Extrae los cumpleaños de esa tienda
@@ -135,14 +133,16 @@
           imagen: f[conf.columnas[2]]?.trim()
         })).filter(x => x.nombre);
 
-        // Si no hay datos → pasa a siguiente pantalla
-        if (datos.length === 0) return siguientePantalla();
+        if (datos.length === 0) {
+          console.warn("No hay cumpleaños registrados");
+          setTimeout(siguientePantalla, 2000);
+          return;
+        }
 
-        // Muestra el primero
         mostrarActual();
       } catch (e) {
-        console.error("Error al cargar:", e);
-        siguientePantalla();
+        console.error("Error al cargar datos:", e);
+        setTimeout(siguientePantalla, 3000);
       }
     }
 
@@ -158,8 +158,9 @@
       lanzarConfeti();
 
       index++;
-      if (index >= datos.length) {
-        // Si ya mostró todos → cambia después de 10 s
+      if (index < datos.length) {
+        setTimeout(mostrarActual, 10000);
+      } else {
         setTimeout(siguientePantalla, 10000);
       }
     }
@@ -178,7 +179,7 @@
         y: Math.random() * -canvas.height,
         r: Math.random() * 6 + 2,
         d: Math.random() * 20 + 10,
-        color: `hsl(${Math.random() * 60 + 40}, 100%, 50%)`
+        color: `hsl(${Math.random() * 60 + 40},100%,50%)`
       }));
       (function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -194,10 +195,6 @@
     }
 
     cargarDatos();
-    // Cambia cumpleaños cada 10s si hay más de uno
-    setInterval(() => {
-      if (datos.length > 1) mostrarActual();
-    }, 10000);
   </script>
 </body>
 </html>

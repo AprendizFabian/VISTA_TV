@@ -40,44 +40,23 @@
       animation: floatLogo 3s ease-in-out infinite alternate;
       z-index: 10;
     }
-    @keyframes floatLogo {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(6px); }
-    }
+    @keyframes floatLogo { 0%{transform:translateY(0);}100%{transform:translateY(6px);} }
     .container {
       text-align: center;
       z-index: 5;
       animation: fadeIn 1.2s ease;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(40px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .title {
-      font-size: 2.6rem;
-      font-weight: 700;
-      color: #FFD60A;
-      text-shadow: 0 0 10px rgba(255,214,10,0.4);
-    }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(40px);} to{opacity:1;transform:translateY(0);} }
+    .title { font-size:2.6rem; font-weight:700; color:#FFD60A; text-shadow:0 0 10px rgba(255,214,10,0.4); }
     .photo {
-      width: 240px;
-      height: 240px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 6px solid #FFD60A;
-      box-shadow: 0 0 30px rgba(255,214,10,0.4);
+      width:240px;height:240px;border-radius:50%;object-fit:cover;
+      border:6px solid #FFD60A;box-shadow:0 0 30px rgba(255,214,10,0.4);
       animation: floatImg 4s ease-in-out infinite;
     }
-    @keyframes floatImg {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-    .nombre { font-size: 2rem; font-weight: 700; margin-top: 25px; }
-    .mensaje { font-size: 1.2rem; color: #555; font-style: italic; margin-top: 8px; }
-    canvas#confetti {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none; z-index: 0;
-    }
+    @keyframes floatImg { 0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);} }
+    .nombre { font-size:2rem;font-weight:700;margin-top:25px; }
+    .mensaje { font-size:1.2rem;color:#555;font-style:italic;margin-top:8px; }
+    canvas#confetti { position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0; }
   </style>
 </head>
 <body>
@@ -96,6 +75,7 @@
 
     const tienda = new URLSearchParams(window.location.search).get("tienda");
     const cont = document.getElementById("contenedor");
+
     const RANGOS = {
       DS_SIERRA: { filaEmpleado: 23, columnas: [0, 1, 2] },
       DS_CHAPINERO: { filaEmpleado: 23, columnas: [5, 6, 7] }
@@ -107,8 +87,11 @@
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
         const conf = RANGOS[tienda];
+
+        // Tienda inválida
         if (!conf) return siguientePantalla();
 
+        // Extrae fila del empleado
         const fila = filas[conf.filaEmpleado] || [];
         const e = {
           nombre: fila[conf.columnas[0]]?.trim(),
@@ -116,9 +99,14 @@
           imagen: fila[conf.columnas[2]]?.trim()
         };
 
-        // Si no hay ningún dato válido → siguiente
-        if (!e.nombre && !e.mensaje && !e.imagen) return siguientePantalla();
+        // Si no hay datos → pasa a la siguiente
+        if (!e.nombre && !e.mensaje && !e.imagen) {
+          console.warn("No hay datos de empleado");
+          setTimeout(siguientePantalla, 3000);
+          return;
+        }
 
+        // Muestra empleado
         cont.innerHTML = `
           <h1 class="title">🏆 Empleado del Mes</h1>
           <img src="${e.imagen}" alt="${e.nombre}" class="photo">
@@ -126,11 +114,12 @@
           <div class="mensaje">${e.mensaje || "Por su excelente desempeño"}</div>`;
         lanzarConfeti();
 
-        // Cambia después de 30 segundos
+        // Cambia tras 30 segundos
         setTimeout(siguientePantalla, 30000);
+
       } catch (err) {
         console.error("Error al cargar empleado:", err);
-        siguientePantalla();
+        setTimeout(siguientePantalla, 3000);
       }
     }
 
@@ -143,13 +132,15 @@
       const ctx = canvas.getContext("2d");
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+
       const p = Array.from({ length: 60 }, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * -canvas.height,
         r: Math.random() * 6 + 2,
         d: Math.random() * 20 + 10,
-        color: `hsl(${Math.random() * 60 + 40},100%,50%)`
+        color: `hsl(${Math.random() * 60 + 40}, 100%, 50%)`
       }));
+
       (function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (const o of p) {
