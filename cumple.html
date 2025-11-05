@@ -17,33 +17,43 @@
       color: #111;
       position: relative;
     }
+
     .corner-black {
-      position: absolute;
-      top: 0; left: 0;
+      position: absolute; top: 0; left: 0;
       width: 0; height: 0;
       border-left: 260px solid #000;
       border-bottom: 230px solid transparent;
       z-index: 2;
     }
     .corner-yellow {
-      position: absolute;
-      bottom: 0; right: 0;
+      position: absolute; bottom: 0; right: 0;
       width: 0; height: 0;
       border-right: 200px solid #FFD60A;
       border-top: 180px solid transparent;
       z-index: 1;
     }
+
+    /* Logo animado: baja, se queda, y sube */
     .logo {
       position: absolute;
-      top: 30px; left: 40px;
-      width: 100px;
-      animation: floatLogo 3s ease-in-out infinite alternate;
-      z-index: 3;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 180px;
+      opacity: 0;
+      z-index: 10;
+      animation: bajarSubir 4s ease-in-out forwards;
     }
-    @keyframes floatLogo {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(6px); }
+    @keyframes bajarSubir {
+      0% { top: -200px; opacity: 0; }
+      40% { top: 45%; opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      60% { top: 45%; opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      100% { top: 30px; left: 40px; transform: translate(0,0) scale(1); width: 100px; opacity: 1; }
     }
+
+    .logo.float { animation: floatLogo 3s ease-in-out infinite alternate; }
+    @keyframes floatLogo { 0% { transform: translateY(0); } 100% { transform: translateY(6px); } }
+
     .card {
       background: rgba(255,255,255,0.9);
       border-radius: 25px;
@@ -53,32 +63,20 @@
       width: 500px;
       border: 1px solid #ddd;
       z-index: 5;
-      animation: fadeIn 1.2s ease;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 1.5s ease;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .title {
-      font-size: 2.3rem;
-      font-weight: 700;
-      color: #000;
-      margin-bottom: 40px;
-    }
+    .card.visible { opacity: 1; transform: translateY(0); }
+
+    .title { font-size: 2.3rem; font-weight: 700; color: #000; margin-bottom: 40px; }
     .photo {
-      width: 250px;
-      height: 250px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 6px solid #FFD60A;
+      width: 250px; height: 250px; border-radius: 50%;
+      object-fit: cover; border: 6px solid #FFD60A;
       box-shadow: 0 0 30px rgba(255,214,10,0.4);
-      margin-top: -120px;
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translate(-50%, 20px);
-      animation: floatImg 5s ease-in-out infinite;
-      background: #fff;
+      margin-top: -120px; position: absolute;
+      top: 0; left: 50%; transform: translate(-50%, 20px);
+      animation: floatImg 5s ease-in-out infinite; background: #fff;
     }
     @keyframes floatImg {
       0%,100% { transform: translate(-50%, 20px); }
@@ -86,12 +84,11 @@
     }
     .nombre { font-size: 1.8rem; font-weight: 700; margin-top: 140px; }
     .mensaje { font-size: 1.2rem; color: #555; font-style: italic; margin-top: 8px; }
+
     canvas#confetti {
-      position: fixed;
-      top: 0; left: 0;
+      position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
+      pointer-events: none; z-index: 0;
     }
   </style>
 </head>
@@ -99,7 +96,7 @@
   <canvas id="confetti"></canvas>
   <div class="corner-black"></div>
   <div class="corner-yellow"></div>
-  <img src="img/logo.png" alt="Logo LUM" class="logo">
+  <img src="img/logo.png" alt="Logo LUM" class="logo" id="logo">
   <div class="card" id="contenedor">
     <h1 class="title">🎂 ¡Feliz Cumpleaños!</h1>
     <p>Cargando...</p>
@@ -111,6 +108,7 @@
 
     const tienda = new URLSearchParams(window.location.search).get("tienda");
     const cont = document.getElementById("contenedor");
+    const logo = document.getElementById("logo");
     const RANGOS = {
       DS_SIERRA: { inicio: 3, fin: 20, columnas: [0, 1, 2] },
       DS_CHAPINERO: { inicio: 3, fin: 20, columnas: [5, 6, 7] }
@@ -126,29 +124,24 @@
         const conf = RANGOS[tienda];
         if (!conf) return siguientePantalla();
 
-        // Extrae los cumpleaños de esa tienda
         datos = filas.slice(conf.inicio, conf.fin).map(f => ({
           nombre: f[conf.columnas[0]]?.trim(),
           mensaje: f[conf.columnas[1]]?.trim(),
           imagen: f[conf.columnas[2]]?.trim()
         })).filter(x => x.nombre);
 
-        if (datos.length === 0) {
-          console.warn("No hay cumpleaños registrados");
-          setTimeout(siguientePantalla, 2000);
-          return;
-        }
-
-        mostrarActual();
-      } catch (e) {
-        console.error("Error al cargar datos:", e);
-        setTimeout(siguientePantalla, 3000);
+        setTimeout(() => {
+          logo.classList.add("float");
+          cont.classList.add("visible");
+          if (datos.length) mostrarActual();
+          else setTimeout(siguientePantalla, 4000);
+        }, 4000);
+      } catch {
+        setTimeout(siguientePantalla, 4000);
       }
     }
 
     function mostrarActual() {
-      if (!datos.length) return siguientePantalla();
-
       const c = datos[index];
       cont.innerHTML = `
         <img src="${c.imagen}" class="photo" alt="${c.nombre}">
@@ -158,11 +151,8 @@
       lanzarConfeti();
 
       index++;
-      if (index < datos.length) {
-        setTimeout(mostrarActual, 10000);
-      } else {
-        setTimeout(siguientePantalla, 10000);
-      }
+      if (index < datos.length) setTimeout(mostrarActual, 10000);
+      else setTimeout(siguientePantalla, 10000);
     }
 
     function siguientePantalla() {

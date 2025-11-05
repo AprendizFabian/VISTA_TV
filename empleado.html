@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Empleado del Mes - LUM</title>
   <style>
     body {
@@ -17,53 +17,70 @@
       color: #111;
       position: relative;
     }
+
     .corner-black {
-      position: absolute;
-      top: 0; left: 0;
+      position: absolute; top: 0; left: 0;
       width: 0; height: 0;
       border-left: 280px solid #000;
       border-bottom: 230px solid transparent;
       z-index: 1;
     }
     .corner-yellow {
-      position: absolute;
-      bottom: 0; right: 0;
+      position: absolute; bottom: 0; right: 0;
       width: 0; height: 0;
       border-right: 200px solid #FFD60A;
       border-top: 180px solid transparent;
       z-index: 1;
     }
+
+    /* Logo animado igual que cumple */
     .logo {
       position: absolute;
-      top: 30px; left: 40px;
-      width: 100px;
-      animation: floatLogo 3s ease-in-out infinite alternate;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 180px;
+      opacity: 0;
       z-index: 10;
+      animation: bajarSubir 4s ease-in-out forwards;
     }
+    @keyframes bajarSubir {
+      0% { top: -200px; opacity: 0; }
+      40% { top: 45%; opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      60% { top: 45%; opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      100% { top: 30px; left: 40px; transform: translate(0,0) scale(1); width: 100px; opacity: 1; }
+    }
+
+    .logo.float { animation: floatLogo 3s ease-in-out infinite alternate; }
     @keyframes floatLogo { 0%{transform:translateY(0);}100%{transform:translateY(6px);} }
+
     .container {
       text-align: center;
       z-index: 5;
-      animation: fadeIn 1.2s ease;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 1.5s ease;
     }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(40px);} to{opacity:1;transform:translateY(0);} }
-    .title { font-size:2.6rem; font-weight:700; color:#FFD60A; text-shadow:0 0 10px rgba(255,214,10,0.4); }
+    .container.visible { opacity: 1; transform: translateY(0); }
+
+    .title { font-size: 2.6rem; font-weight: 700; color: #FFD60A; text-shadow: 0 0 10px rgba(255,214,10,0.4); }
     .photo {
-      width:240px;height:240px;border-radius:50%;object-fit:cover;
-      border:6px solid #FFD60A;box-shadow:0 0 30px rgba(255,214,10,0.4);
+      width: 240px; height: 240px; border-radius: 50%; object-fit: cover;
+      border: 6px solid #FFD60A; box-shadow: 0 0 30px rgba(255,214,10,0.4);
       animation: floatImg 4s ease-in-out infinite;
     }
     @keyframes floatImg { 0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);} }
-    .nombre { font-size:2rem;font-weight:700;margin-top:25px; }
-    .mensaje { font-size:1.2rem;color:#555;font-style:italic;margin-top:8px; }
-    canvas#confetti { position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0; }
+    .nombre { font-size: 2rem; font-weight: 700; margin-top: 25px; }
+    .mensaje { font-size: 1.2rem; color: #555; font-style: italic; margin-top: 8px; }
+
+    canvas#confetti { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
   </style>
 </head>
 <body>
   <canvas id="confetti"></canvas>
   <div class="corner-black"></div>
   <div class="corner-yellow"></div>
-  <img src="img/logo.png" alt="Logo LUM" class="logo">
+  <img src="img/logo.png" alt="Logo LUM" class="logo" id="logo">
   <div class="container" id="contenedor">
     <h1 class="title">🏆 Empleado del Mes</h1>
     <p>Cargando...</p>
@@ -75,6 +92,7 @@
 
     const tienda = new URLSearchParams(window.location.search).get("tienda");
     const cont = document.getElementById("contenedor");
+    const logo = document.getElementById("logo");
 
     const RANGOS = {
       DS_SIERRA: { filaEmpleado: 23, columnas: [0, 1, 2] },
@@ -87,11 +105,8 @@
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
         const conf = RANGOS[tienda];
-
-        // Tienda inválida
         if (!conf) return siguientePantalla();
 
-        // Extrae fila del empleado
         const fila = filas[conf.filaEmpleado] || [];
         const e = {
           nombre: fila[conf.columnas[0]]?.trim(),
@@ -99,27 +114,26 @@
           imagen: fila[conf.columnas[2]]?.trim()
         };
 
-        // Si no hay datos → pasa a la siguiente
-        if (!e.nombre && !e.mensaje && !e.imagen) {
-          console.warn("No hay datos de empleado");
-          setTimeout(siguientePantalla, 3000);
-          return;
-        }
+        setTimeout(() => {
+          logo.classList.add("float");
+          cont.classList.add("visible");
 
-        // Muestra empleado
-        cont.innerHTML = `
-          <h1 class="title">🏆 Empleado del Mes</h1>
-          <img src="${e.imagen}" alt="${e.nombre}" class="photo">
-          <div class="nombre">${e.nombre}</div>
-          <div class="mensaje">${e.mensaje || "Por su excelente desempeño"}</div>`;
-        lanzarConfeti();
+          if (!e.nombre && !e.mensaje && !e.imagen) {
+            setTimeout(siguientePantalla, 4000);
+            return;
+          }
 
-        // Cambia tras 30 segundos
-        setTimeout(siguientePantalla, 30000);
+          cont.innerHTML = `
+            <h1 class="title">🏆 Empleado del Mes</h1>
+            <img src="${e.imagen}" alt="${e.nombre}" class="photo">
+            <div class="nombre">${e.nombre}</div>
+            <div class="mensaje">${e.mensaje || "Por su excelente desempeño"}</div>`;
+          lanzarConfeti();
 
-      } catch (err) {
-        console.error("Error al cargar empleado:", err);
-        setTimeout(siguientePantalla, 3000);
+          setTimeout(siguientePantalla, 30000);
+        }, 4000);
+      } catch {
+        setTimeout(siguientePantalla, 4000);
       }
     }
 
@@ -132,7 +146,6 @@
       const ctx = canvas.getContext("2d");
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-
       const p = Array.from({ length: 60 }, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * -canvas.height,
@@ -140,7 +153,6 @@
         d: Math.random() * 20 + 10,
         color: `hsl(${Math.random() * 60 + 40}, 100%, 50%)`
       }));
-
       (function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (const o of p) {
