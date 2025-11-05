@@ -10,166 +10,46 @@
       background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
       height: 100vh;
       margin: 0;
-      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
+      flex-direction: column;
     }
-
-    /* Triángulos decorativos */
-    .corner-black {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 0;
-      height: 0;
-      border-left: 300px solid #414242;
-      border-bottom: 250px solid transparent;
-    }
-    .corner-yellow {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 0;
-      height: 0;
-      border-right: 220px solid #FFD60A;
-      border-top: 180px solid transparent;
-    }
-
-    .logo {
-      position: absolute;
-      top: 20px;
-      left: 30px;
-      width: 100px;
-      animation: float 1s ease-in-out infinite alternate;
-    }
-
-    @keyframes float {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(6px); }
-    }
-
-    .container {
-      text-align: center;
-      z-index: 5;
-      animation: fadeIn 1s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      color: #111;
-      margin-bottom: 40px;
-    }
-
-    .select-box {
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-      padding: 40px 60px;
-      display: inline-block;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .select-box:hover {
-      transform: scale(1.02);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-    }
-
-    select {
-      font-size: 1.2rem;
-      padding: 10px 20px;
-      border: 2px solid #FFD60A;
-      border-radius: 10px;
-      background: #fff;
-      color: #111;
-      outline: none;
-      transition: 0.3s;
-    }
-
-    select:hover {
-      border-color: #000;
-    }
-
-    button {
-      margin-top: 25px;
-      background: #FFD60A;
-      border: none;
-      color: #000;
+    select, button {
       font-size: 1.1rem;
-      padding: 10px 25px;
+      padding: 10px 20px;
       border-radius: 10px;
+      border: 2px solid #FFD60A;
+      margin: 10px;
+    }
+    button {
+      background: #FFD60A;
+      color: #000;
       cursor: pointer;
       transition: 0.3s;
     }
-
-    button:hover {
-      background: #000;
-      color: #FFD60A;
-    }
-
-    /* 🔔 Toast / advertencia */
-    .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #FFD60A;
-      color: #111;
-      padding: 15px 25px;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      font-weight: 600;
-      opacity: 0;
-      transform: translateY(-20px);
-      animation: showToast 0.6s forwards, hideToast 0.6s 5s forwards;
-      z-index: 10;
-    }
-
-    @keyframes showToast {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes hideToast {
-      to { opacity: 0; transform: translateY(-20px); }
-    }
+    button:hover { background: #000; color: #FFD60A; }
   </style>
 </head>
 <body>
-  <div class="corner-black"></div>
-  <div class="corner-yellow"></div>
-  <img src="img/logo.png" class="logo" alt="Logo LUM" />
-
-  <div class="toast">⚠️ Antes de presentar por favor, selecciona la tienda donde se proyectará la pantalla.</div>
-
-  <div class="container">
-    <div class="select-box">
-      <h1>Selecciona tu tienda</h1>
-      <select id="tienda">
-        <option value="">-- Elegir Tienda --</option>
-        <option value="DS01">DS01 - Calle 80</option>
-        <option value="DS02">DS02 - Suba</option>
-        <option value="DS03">DS03 - Engativá</option>
-        <option value="DS04">DS04 - Chapinero</option>
-      </select>
-      <br>
-      <button onclick="irATienda()">Ingresar</button>
-    </div>
-  </div>
+  <h1>🎉 Pantalla Informativa - Selecciona tu tienda</h1>
+  <select id="tienda">
+    <option value="">-- Elegir Tienda --</option>
+    <option value="DS_SIERRA">DS Sierra</option>
+    <option value="DS_CHAPINERO">DS Chapinero</option>
+  </select>
+  <button onclick="irATienda()">Ingresar</button>
 
   <script>
-    function irATienda() {
-      const tienda = document.getElementById("tienda").value;
-      if (!tienda) {
-        alert("Por favor selecciona una tienda.");
-        return;
-      }
-      window.location.href = `cumple.html?tienda=${encodeURIComponent(tienda)}`;
-    }
-  </script>
+  function irATienda() {
+    const tienda = document.getElementById("tienda").value;
+    if (!tienda) return alert("Por favor selecciona una tienda");
+
+    // Redirección explícita con ruta absoluta para mantener parámetros
+    const base = window.location.origin + window.location.pathname.replace("index.html", "");
+    window.location.href = base + `cumple.html?tienda=${encodeURIComponent(tienda)}`;
+  }
+</script>
+
 </body>
 </html>

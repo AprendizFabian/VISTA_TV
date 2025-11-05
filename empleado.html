@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Empleado del Mes - LUM</title>
+  <script src="js/data.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body style="background:#fff; color:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;">
+  <img src="img/logo.png" style="width:100px; position:absolute; top:20px; left:20px;">
+  <div id="contenedor" style="text-align:center;">
+    <h1 style="color:#FFD60A;">🏆 Empleado del Mes</h1>
+    <p>Cargando...</p>
+  </div>
+
+  <script>
+    const TSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
+
+    async function iniciar() {
+      const filas = await obtenerFilas(TSV_URL);
+      const idx = filas.findIndex(f => f.toLowerCase().includes("empleado del mes"));
+      const empleadoFila = filas[idx + 2];
+      const e = parseFila(empleadoFila);
+      document.getElementById("contenedor").innerHTML = `
+        <h1 style="color:#FFD60A;">🏆 Empleado del Mes</h1>
+        <img src="${convertirLink(e.imagen)}" style="width:230px; height:230px; border-radius:50%; border:5px solid #FFD60A; margin:20px;">
+        <h2>${e.nombre}</h2>
+        <p style="font-style:italic;">${e.mensaje || "Por su excelente desempeño"}</p>`;
+    }
+
+    iniciar();
+
+    // vuelve a cumpleaños después de 30 segundos
+    setTimeout(() => window.location.href = "cumple.html", 30000);
+  </script>
+</body>
+</html>
+
