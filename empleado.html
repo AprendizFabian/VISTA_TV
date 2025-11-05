@@ -146,10 +146,7 @@
         const filas = text.trim().split("\n").map(f => f.split("\t"));
         const conf = RANGOS[tienda];
 
-        if (!conf) {
-          cont.innerHTML = `<h1>❌ Tienda no encontrada</h1>`;
-          return;
-        }
+        if (!conf) return cerrarPantalla();
 
         const fila = filas[conf.filaEmpleado] || [];
         const empleado = {
@@ -158,8 +155,9 @@
           imagen: fila[conf.columnas[2]]?.trim()
         };
 
-        if (!empleado.nombre) {
-          cont.innerHTML = "";
+        // ❌ Si no hay datos válidos, ni muestra nada
+        if (!empleado.nombre && !empleado.mensaje && !empleado.imagen) {
+          cerrarPantalla();
           return;
         }
 
@@ -172,8 +170,13 @@
         lanzarConfeti();
       } catch (err) {
         console.error(err);
-        cont.innerHTML = `<h1>⚠️ Error al cargar datos</h1>`;
+        cerrarPantalla();
       }
+    }
+
+    function cerrarPantalla() {
+      // Si se ejecuta en navegador (TV), mejor redirigir a una pantalla neutra
+      window.location.href = "blank.html";
     }
 
     function lanzarConfeti() {
