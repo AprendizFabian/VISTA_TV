@@ -33,7 +33,7 @@
       z-index: 1;
     }
 
-    /* Logo animado igual que cumple */
+    /* 🎥 Animación del logo: baja, se queda, sube y desaparece */
     .logo {
       position: absolute;
       top: -200px;
@@ -42,13 +42,14 @@
       width: 180px;
       opacity: 0;
       z-index: 10;
-      animation: bajarSubir 4s ease-in-out forwards;
+      animation: introLogo 5s ease-in-out forwards;
     }
-    @keyframes bajarSubir {
+
+    @keyframes introLogo {
       0% { top: -200px; opacity: 0; }
-      40% { top: 45%; opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      30% { top: 45%; opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
       60% { top: 45%; opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-      100% { top: 30px; left: 40px; transform: translate(0,0) scale(1); width: 100px; opacity: 1; }
+      100% { top: -150px; opacity: 0; transform: translate(-50%, -50%) scale(1); }
     }
 
     .logo.float { animation: floatLogo 3s ease-in-out infinite alternate; }
@@ -59,7 +60,7 @@
       z-index: 5;
       opacity: 0;
       transform: translateY(40px);
-      transition: all 1.5s ease;
+      transition: all 1.2s ease;
     }
     .container.visible { opacity: 1; transform: translateY(0); }
 
@@ -114,8 +115,8 @@
           imagen: fila[conf.columnas[2]]?.trim()
         };
 
+        // Espera 5s para que el logo haga su animación completa (baja, se queda, sube, desaparece)
         setTimeout(() => {
-          logo.classList.add("float");
           cont.classList.add("visible");
 
           if (!e.nombre && !e.mensaje && !e.imagen) {
@@ -130,8 +131,9 @@
             <div class="mensaje">${e.mensaje || "Por su excelente desempeño"}</div>`;
           lanzarConfeti();
 
+          // Dura 30 segundos la pantalla
           setTimeout(siguientePantalla, 30000);
-        }, 4000);
+        }, 5000);
       } catch {
         setTimeout(siguientePantalla, 4000);
       }
