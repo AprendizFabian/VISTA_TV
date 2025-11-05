@@ -16,46 +16,47 @@
       overflow: hidden;
       color: #111;
       position: relative;
+      transition: opacity 1s ease;
     }
+    body.fade-out { opacity: 0; }
 
     .corner-black {
-      position: absolute; top: 0; left: 0;
+      position: absolute;
+      top: 0; left: 0;
       width: 0; height: 0;
       border-left: 260px solid #000;
       border-bottom: 230px solid transparent;
       z-index: 2;
     }
     .corner-yellow {
-      position: absolute; bottom: 0; right: 0;
+      position: absolute;
+      bottom: 0; right: 0;
       width: 0; height: 0;
       border-right: 200px solid #FFD60A;
       border-top: 180px solid transparent;
       z-index: 1;
     }
 
-    /* Logo animado: baja, se queda, y sube */
+    /* Logo centrado y fade suave */
     .logo {
       position: absolute;
-      top: -200px;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translate(-50%, -50%) scale(1);
       width: 180px;
       opacity: 0;
+      animation: fadeInOut 3.5s ease-in-out;
       z-index: 10;
-      animation: bajarSubir 4s ease-in-out forwards;
     }
-    @keyframes bajarSubir {
-      0% { top: -200px; opacity: 0; }
-      40% { top: 45%; opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-      60% { top: 45%; opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-      100% { top: 30px; left: 40px; transform: translate(0,0) scale(1); width: 100px; opacity: 1; }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      30% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+      70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
     }
-
-    .logo.float { animation: floatLogo 3s ease-in-out infinite alternate; }
-    @keyframes floatLogo { 0% { transform: translateY(0); } 100% { transform: translateY(6px); } }
 
     .card {
-      background: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.92);
       border-radius: 25px;
       box-shadow: 0 10px 40px rgba(0,0,0,0.15);
       text-align: center;
@@ -65,7 +66,7 @@
       z-index: 5;
       opacity: 0;
       transform: translateY(30px);
-      transition: all 1.5s ease;
+      transition: all 1.2s ease;
     }
     .card.visible { opacity: 1; transform: translateY(0); }
 
@@ -82,6 +83,7 @@
       0%,100% { transform: translate(-50%, 20px); }
       50% { transform: translate(-50%, 10px); }
     }
+
     .nombre { font-size: 1.8rem; font-weight: 700; margin-top: 140px; }
     .mensaje { font-size: 1.2rem; color: #555; font-style: italic; margin-top: 8px; }
 
@@ -90,9 +92,23 @@
       width: 100%; height: 100%;
       pointer-events: none; z-index: 0;
     }
+
+    /* Overlay de transición */
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s ease;
+      z-index: 999;
+    }
+    .overlay.active { opacity: 1; }
   </style>
 </head>
 <body>
+  <div class="overlay" id="overlay"></div>
   <canvas id="confetti"></canvas>
   <div class="corner-black"></div>
   <div class="corner-yellow"></div>
@@ -108,7 +124,8 @@
 
     const tienda = new URLSearchParams(window.location.search).get("tienda");
     const cont = document.getElementById("contenedor");
-    const logo = document.getElementById("logo");
+    const overlay = document.getElementById("overlay");
+
     const RANGOS = {
       DS_SIERRA: { inicio: 3, fin: 20, columnas: [0, 1, 2] },
       DS_CHAPINERO: { inicio: 3, fin: 20, columnas: [5, 6, 7] }
@@ -130,12 +147,12 @@
           imagen: f[conf.columnas[2]]?.trim()
         })).filter(x => x.nombre);
 
+        // Mostrar tarjeta después del fade del logo
         setTimeout(() => {
-          logo.classList.add("float");
           cont.classList.add("visible");
           if (datos.length) mostrarActual();
           else setTimeout(siguientePantalla, 4000);
-        }, 4000);
+        }, 3500);
       } catch {
         setTimeout(siguientePantalla, 4000);
       }
@@ -152,11 +169,12 @@
 
       index++;
       if (index < datos.length) setTimeout(mostrarActual, 10000);
-      else setTimeout(siguientePantalla, 10000);
+      else setTimeout(() => transicion("empleado.html"), 12000);
     }
 
-    function siguientePantalla() {
-      window.location.href = `empleado.html?tienda=${encodeURIComponent(tienda)}`;
+    function transicion(destino) {
+      overlay.classList.add("active");
+      setTimeout(() => { window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`; }, 1000);
     }
 
     function lanzarConfeti() {

@@ -16,7 +16,9 @@
       overflow: hidden;
       color: #111;
       position: relative;
+      transition: opacity 1s ease;
     }
+    body.fade-out { opacity: 0; }
 
     .corner-black {
       position: absolute; top: 0; left: 0;
@@ -33,27 +35,22 @@
       z-index: 1;
     }
 
-    /* 🎥 Animación del logo: baja, se queda, sube y desaparece */
     .logo {
       position: absolute;
-      top: -200px;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translate(-50%, -50%) scale(1);
       width: 180px;
       opacity: 0;
+      animation: fadeInOut 3.5s ease-in-out;
       z-index: 10;
-      animation: introLogo 5s ease-in-out forwards;
     }
-
-    @keyframes introLogo {
-      0% { top: -200px; opacity: 0; }
-      30% { top: 45%; opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-      60% { top: 45%; opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-      100% { top: -150px; opacity: 0; transform: translate(-50%, -50%) scale(1); }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      30% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+      70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
     }
-
-    .logo.float { animation: floatLogo 3s ease-in-out infinite alternate; }
-    @keyframes floatLogo { 0%{transform:translateY(0);}100%{transform:translateY(6px);} }
 
     .container {
       text-align: center;
@@ -75,9 +72,21 @@
     .mensaje { font-size: 1.2rem; color: #555; font-style: italic; margin-top: 8px; }
 
     canvas#confetti { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+
+    .overlay {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s ease;
+      z-index: 999;
+    }
+    .overlay.active { opacity: 1; }
   </style>
 </head>
 <body>
+  <div class="overlay" id="overlay"></div>
   <canvas id="confetti"></canvas>
   <div class="corner-black"></div>
   <div class="corner-yellow"></div>
@@ -93,7 +102,7 @@
 
     const tienda = new URLSearchParams(window.location.search).get("tienda");
     const cont = document.getElementById("contenedor");
-    const logo = document.getElementById("logo");
+    const overlay = document.getElementById("overlay");
 
     const RANGOS = {
       DS_SIERRA: { filaEmpleado: 23, columnas: [0, 1, 2] },
@@ -115,10 +124,8 @@
           imagen: fila[conf.columnas[2]]?.trim()
         };
 
-        // Espera 5s para que el logo haga su animación completa (baja, se queda, sube, desaparece)
         setTimeout(() => {
           cont.classList.add("visible");
-
           if (!e.nombre && !e.mensaje && !e.imagen) {
             setTimeout(siguientePantalla, 4000);
             return;
@@ -131,16 +138,16 @@
             <div class="mensaje">${e.mensaje || "Por su excelente desempeño"}</div>`;
           lanzarConfeti();
 
-          // Dura 30 segundos la pantalla
-          setTimeout(siguientePantalla, 30000);
-        }, 5000);
+          setTimeout(() => transicion("motivacional.html"), 30000);
+        }, 3500);
       } catch {
-        setTimeout(siguientePantalla, 4000);
+        setTimeout(() => transicion("motivacional.html"), 4000);
       }
     }
 
-    function siguientePantalla() {
-      window.location.href = `motivacional.html?tienda=${encodeURIComponent(tienda)}`;
+    function transicion(destino) {
+      overlay.classList.add("active");
+      setTimeout(() => { window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`; }, 1000);
     }
 
     function lanzarConfeti() {
