@@ -17,7 +17,6 @@
       color: #111;
       position: relative;
     }
-
     .corner-black {
       position: absolute;
       top: 0; left: 0;
@@ -101,17 +100,22 @@
   <div class="corner-black"></div>
   <div class="corner-yellow"></div>
   <img src="img/logo.png" alt="Logo LUM" class="logo">
-  <div class="card" id="contenedor"><h1 class="title">🎂 ¡Feliz Cumpleaños!</h1><p>Cargando...</p></div>
+  <div class="card" id="contenedor">
+    <h1 class="title">🎂 ¡Feliz Cumpleaños!</h1>
+    <p>Cargando...</p>
+  </div>
 
   <script>
     const SHEET_URL =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
+
     const tienda = new URLSearchParams(window.location.search).get("tienda");
     const cont = document.getElementById("contenedor");
     const RANGOS = {
       DS_SIERRA: { inicio: 3, fin: 20, columnas: [0, 1, 2] },
       DS_CHAPINERO: { inicio: 3, fin: 20, columnas: [5, 6, 7] }
     };
+
     let index = 0, datos = [];
 
     async function cargarDatos() {
@@ -120,22 +124,31 @@
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
         const conf = RANGOS[tienda];
+
+        // Si no se seleccionó tienda, redirige directo
         if (!conf) return siguientePantalla();
 
+        // Extrae los cumpleaños de esa tienda
         datos = filas.slice(conf.inicio, conf.fin).map(f => ({
           nombre: f[conf.columnas[0]]?.trim(),
           mensaje: f[conf.columnas[1]]?.trim(),
           imagen: f[conf.columnas[2]]?.trim()
         })).filter(x => x.nombre);
 
-        if (datos.length > 0) mostrarActual();
-        else siguientePantalla();
+        // Si no hay datos → pasa a siguiente pantalla
+        if (datos.length === 0) return siguientePantalla();
+
+        // Muestra el primero
+        mostrarActual();
       } catch (e) {
+        console.error("Error al cargar:", e);
         siguientePantalla();
       }
     }
 
     function mostrarActual() {
+      if (!datos.length) return siguientePantalla();
+
       const c = datos[index];
       cont.innerHTML = `
         <img src="${c.imagen}" class="photo" alt="${c.nombre}">
@@ -143,7 +156,12 @@
         <div class="nombre">${c.nombre}</div>
         <div class="mensaje">${c.mensaje}</div>`;
       lanzarConfeti();
-      index = (index + 1) % datos.length;
+
+      index++;
+      if (index >= datos.length) {
+        // Si ya mostró todos → cambia después de 10 s
+        setTimeout(siguientePantalla, 10000);
+      }
     }
 
     function siguientePantalla() {
@@ -153,24 +171,33 @@
     function lanzarConfeti() {
       const canvas = document.getElementById("confetti");
       const ctx = canvas.getContext("2d");
-      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
       const p = Array.from({ length: 80 }, () => ({
-        x: Math.random()*canvas.width, y: Math.random()*-canvas.height,
-        r: Math.random()*6+2, d: Math.random()*20+10,
-        color: `hsl(${Math.random()*60+40},100%,50%)`
+        x: Math.random() * canvas.width,
+        y: Math.random() * -canvas.height,
+        r: Math.random() * 6 + 2,
+        d: Math.random() * 20 + 10,
+        color: `hsl(${Math.random() * 60 + 40}, 100%, 50%)`
       }));
       (function draw() {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        for(const o of p){ctx.fillStyle=o.color;ctx.fillRect(o.x,o.y,o.r,o.r);
-          o.y+=Math.cos(o.d)+2;o.x+=Math.sin(o.d);if(o.y>canvas.height)o.y=0;}
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const o of p) {
+          ctx.fillStyle = o.color;
+          ctx.fillRect(o.x, o.y, o.r, o.r);
+          o.y += Math.cos(o.d) + 2;
+          o.x += Math.sin(o.d);
+          if (o.y > canvas.height) o.y = 0;
+        }
         requestAnimationFrame(draw);
       })();
     }
 
     cargarDatos();
-    setInterval(mostrarActual, 10000);
-    setInterval(cargarDatos, 30000);
-    setTimeout(siguientePantalla, 40000);
+    // Cambia cumpleaños cada 10s si hay más de uno
+    setInterval(() => {
+      if (datos.length > 1) mostrarActual();
+    }, 10000);
   </script>
 </body>
 </html>
