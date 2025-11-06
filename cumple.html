@@ -16,15 +16,13 @@
       overflow: hidden;
       color: #111;
       position: relative;
-      transition: opacity 1s ease;
     }
-    body.fade-out { opacity: 0; }
 
     .corner-black {
       position: absolute;
       top: 0; left: 0;
       width: 0; height: 0;
-      border-left: 260px solid #000;
+      border-left: 260px solid #ffffff;
       border-bottom: 230px solid transparent;
       z-index: 2;
     }
@@ -37,30 +35,21 @@
       z-index: 1;
     }
 
-    /* Logo centrado y fade suave */
     .logo {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(1);
-      width: 180px;
-      opacity: 0;
-      animation: fadeInOut 3.5s ease-in-out;
-      z-index: 10;
+      top: 30px; left: 40px;
+      width: 100px;
+      animation: floatLogo 3s ease-in-out infinite alternate;
+      z-index: 3;
     }
-    @keyframes fadeInOut {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-      30% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
-      70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-    }
+    @keyframes floatLogo { 0% { transform: translateY(0); } 100% { transform: translateY(6px); } }
 
     .card {
       background: rgba(255,255,255,0.92);
       border-radius: 25px;
       box-shadow: 0 10px 40px rgba(0,0,0,0.15);
       text-align: center;
-      padding: 100px 60px 60px;
+      padding: 140px 60px 60px;
       width: 500px;
       border: 1px solid #ddd;
       z-index: 5;
@@ -72,19 +61,20 @@
 
     .title { font-size: 2.3rem; font-weight: 700; color: #000; margin-bottom: 40px; }
     .photo {
-      width: 250px; height: 250px; border-radius: 50%;
+      width: 220px; height: 220px; border-radius: 50%;
       object-fit: cover; border: 6px solid #FFD60A;
       box-shadow: 0 0 30px rgba(255,214,10,0.4);
-      margin-top: -120px; position: absolute;
-      top: 0; left: 50%; transform: translate(-50%, 20px);
-      animation: floatImg 5s ease-in-out infinite; background: #fff;
+      position: relative;
+      margin-top: -60px;
+      animation: floatImg 5s ease-in-out infinite;
+      background: #fff;
     }
     @keyframes floatImg {
-      0%,100% { transform: translate(-50%, 20px); }
-      50% { transform: translate(-50%, 10px); }
+      0%,100% { transform: translateY(6px); }
+      50% { transform: translateY(-6px); }
     }
 
-    .nombre { font-size: 1.8rem; font-weight: 700; margin-top: 140px; }
+    .nombre { font-size: 1.8rem; font-weight: 700; margin-top: 20px; }
     .mensaje { font-size: 1.2rem; color: #555; font-style: italic; margin-top: 8px; }
 
     canvas#confetti {
@@ -93,26 +83,41 @@
       pointer-events: none; z-index: 0;
     }
 
-    /* Overlay de transición */
-    .overlay {
+    /* Imagen de carga (intro y salida) */
+    .carga {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: #000;
-      opacity: 0;
-      pointer-events: none;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 1;
       transition: opacity 1s ease;
-      z-index: 999;
     }
-    .overlay.active { opacity: 1; }
+    .carga img {
+      width: 350px;
+      max-width: 80%;
+      animation: aparecer 2s ease;
+    }
+    @keyframes aparecer {
+      0% { opacity: 0; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .carga.oculta { opacity: 0; pointer-events: none; }
   </style>
 </head>
 <body>
-  <div class="overlay" id="overlay"></div>
+  <div class="carga" id="pantallaCarga">
+    <img src="img/carga.png" alt="Cargando...">
+  </div>
+
   <canvas id="confetti"></canvas>
   <div class="corner-black"></div>
   <div class="corner-yellow"></div>
-  <img src="img/logo.png" alt="Logo LUM" class="logo" id="logo">
+  <img src="img/logo.png" alt="Logo LUM" class="logo">
   <div class="card" id="contenedor">
     <h1 class="title">🎂 ¡Feliz Cumpleaños!</h1>
     <p>Cargando...</p>
@@ -121,10 +126,9 @@
   <script>
     const SHEET_URL =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
-
     const tienda = new URLSearchParams(window.location.search).get("tienda");
     const cont = document.getElementById("contenedor");
-    const overlay = document.getElementById("overlay");
+    const pantallaCarga = document.getElementById("pantallaCarga");
 
     const RANGOS = {
       DS_SIERRA: { inicio: 3, fin: 20, columnas: [0, 1, 2] },
@@ -147,14 +151,18 @@
           imagen: f[conf.columnas[2]]?.trim()
         })).filter(x => x.nombre);
 
-        // Mostrar tarjeta después del fade del logo
         setTimeout(() => {
-          cont.classList.add("visible");
-          if (datos.length) mostrarActual();
-          else setTimeout(siguientePantalla, 4000);
-        }, 3500);
+          pantallaCarga.classList.add("oculta");
+          if (datos.length) {
+            cont.classList.add("visible");
+            mostrarActual();
+          } else {
+            // No hay registros → transición directa a empleado con animación
+            setTimeout(() => transicion("empleado.html"), 1500);
+          }
+        }, 2000);
       } catch {
-        setTimeout(siguientePantalla, 4000);
+        setTimeout(() => transicion("empleado.html"), 1500);
       }
     }
 
@@ -173,8 +181,9 @@
     }
 
     function transicion(destino) {
-      overlay.classList.add("active");
-      setTimeout(() => { window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`; }, 1000);
+      pantallaCarga.classList.remove("oculta");
+      pantallaCarga.style.opacity = "1";
+      setTimeout(() => { window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`; }, 1200);
     }
 
     function lanzarConfeti() {

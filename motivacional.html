@@ -50,6 +50,7 @@
       top: 30px; left: 30px;
       width: 90px;
       animation: float 3s ease-in-out infinite alternate;
+      z-index: 3;
     }
 
     @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(6px); } }
@@ -66,14 +67,42 @@
       animation: moveGlow 8s ease-in-out infinite alternate;
       z-index: 0;
     }
-
     @keyframes moveGlow {
       0% { top: 10%; left: 10%; }
       100% { top: 60%; left: 60%; }
     }
+
+    /* Imagen de carga (intro/salida) */
+    .carga {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 1;
+      transition: opacity 1s ease;
+    }
+    .carga img {
+      width: 350px;
+      max-width: 80%;
+      animation: aparecer 2s ease;
+    }
+    @keyframes aparecer {
+      0% { opacity: 0; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .carga.oculta { opacity: 0; pointer-events: none; }
   </style>
 </head>
 <body>
+  <div class="carga" id="pantallaCarga">
+    <img src="img/carga.png" alt="Cargando...">
+  </div>
+
   <div class="glow"></div>
   <img src="img/logo.png" class="logo" alt="Logo LUM">
   <h1>🌟 Mensaje del Día</h1>
@@ -81,40 +110,45 @@
   <div class="autor" id="autor"></div>
 
   <script>
-    // 👉 URL pública de la hoja MOTIVACIONAL (ajusta el gid de esa pestaña)
     const MOTIVACIONAL_URL =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=734092806&single=true&output=tsv";
 
-    // Extrae el parámetro de tienda para mantener el ciclo
     const tienda = new URLSearchParams(window.location.search).get("tienda");
+    const pantallaCarga = document.getElementById("pantallaCarga");
 
     async function cargarFrase() {
       try {
         const res = await fetch(`${MOTIVACIONAL_URL}&nocache=${Date.now()}`);
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
-
-        // 🧠 Toma filas desde A2:B50 (omite encabezados vacíos)
         const frases = filas.slice(1, 50).filter(f => f[0]?.trim());
 
-        if (frases.length === 0) {
-          console.warn("Sin mensajes motivacionales.");
-          setTimeout(() => window.location.href = `cumple.html?tienda=${encodeURIComponent(tienda)}`, 2000);
-          return;
-        }
+        setTimeout(() => {
+          pantallaCarga.classList.add("oculta");
 
-        // 🎯 Escoge una frase aleatoria
-        const aleatoria = frases[Math.floor(Math.random() * frases.length)];
+          if (frases.length === 0) {
+            // No hay datos → pasa a cumpleaños suavemente
+            setTimeout(() => transicion("cumple.html"), 1500);
+            return;
+          }
 
-        document.getElementById("mensaje").textContent = `"${aleatoria[0].trim()}"`;
-        document.getElementById("autor").textContent = aleatoria[1] ? `— ${aleatoria[1].trim()}` : "";
+          const aleatoria = frases[Math.floor(Math.random() * frases.length)];
+          document.getElementById("mensaje").textContent = `"${aleatoria[0].trim()}"`;
+          document.getElementById("autor").textContent = aleatoria[1] ? `— ${aleatoria[1].trim()}` : "";
 
-        // ⏱️ Después de 30 segundos → vuelve a cumpleaños
-        setTimeout(() => window.location.href = `cumple.html?tienda=${encodeURIComponent(tienda)}`, 30000);
+          // Después de 30 segundos → transición a cumpleaños
+          setTimeout(() => transicion("cumple.html"), 30000);
+        }, 2000);
       } catch (e) {
         console.error("Error al cargar motivacional:", e);
-        setTimeout(() => window.location.href = `cumple.html?tienda=${encodeURIComponent(tienda)}`, 3000);
+        setTimeout(() => transicion("cumple.html"), 2000);
       }
+    }
+
+    function transicion(destino) {
+      pantallaCarga.classList.remove("oculta");
+      pantallaCarga.style.opacity = "1";
+      setTimeout(() => { window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`; }, 1200);
     }
 
     cargarFrase();
