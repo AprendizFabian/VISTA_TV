@@ -63,7 +63,7 @@
 
     canvas#confetti { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
 
-    /* Imagen de carga (intro/salida) */
+    /* Pantalla de carga inicial */
     .carga {
       position: fixed;
       top: 0; left: 0;
@@ -87,9 +87,23 @@
       100% { opacity: 1; transform: scale(1); }
     }
     .carga.oculta { opacity: 0; pointer-events: none; }
+
+    /* Fusión blanca entre pantallas */
+    .fade-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #fff;
+      opacity: 0;
+      z-index: 999;
+      pointer-events: none;
+      transition: opacity 1.2s ease;
+    }
+    .fade-overlay.activo { opacity: 1; }
   </style>
 </head>
 <body>
+  <div class="fade-overlay" id="fadeOverlay"></div>
   <div class="carga" id="pantallaCarga">
     <img src="img/carga.png" alt="Cargando...">
   </div>
@@ -109,6 +123,7 @@
     const tienda = new URLSearchParams(window.location.search).get("tienda");
     const cont = document.getElementById("contenedor");
     const pantallaCarga = document.getElementById("pantallaCarga");
+    const fadeOverlay = document.getElementById("fadeOverlay");
 
     const RANGOS = {
       DS_SIERRA: { filaEmpleado: 23, columnas: [0, 1, 2] },
@@ -130,13 +145,11 @@
           imagen: fila[conf.columnas[2]]?.trim()
         };
 
-        // Desaparece carga inicial y muestra contenido o pasa directo
         setTimeout(() => {
           pantallaCarga.classList.add("oculta");
 
           if (!e.nombre && !e.mensaje && !e.imagen) {
-            // No hay datos → pasa a motivacional suavemente
-            setTimeout(() => transicion("motivacional.html"), 1500);
+            setTimeout(() => transicion("motivacional.html"), 2000);
             return;
           }
 
@@ -148,7 +161,7 @@
             <div class="mensaje">${e.mensaje || "Por su excelente desempeño"}</div>`;
           lanzarConfeti();
 
-          // Después de 30s → pasa con transición
+          // Muestra durante 30s → transición suave blanca
           setTimeout(() => transicion("motivacional.html"), 30000);
         }, 2000);
       } catch {
@@ -157,9 +170,10 @@
     }
 
     function transicion(destino) {
-      pantallaCarga.classList.remove("oculta");
-      pantallaCarga.style.opacity = "1";
-      setTimeout(() => { window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`; }, 1200);
+      fadeOverlay.classList.add("activo");
+      setTimeout(() => {
+        window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`;
+      }, 1200);
     }
 
     function lanzarConfeti() {
