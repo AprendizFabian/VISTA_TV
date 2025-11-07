@@ -3,42 +3,88 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Datos desde Redash</title>
+  <title>📊 Dashboard - Redash</title>
+
+  <!-- DataTables + jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css">
+  <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+
+  <!-- Animaciones y estilo -->
   <style>
     body {
       font-family: "Poppins", sans-serif;
-      background: #fafafa;
+      background: linear-gradient(135deg, #f9f9f9, #ffffff);
       color: #111;
       text-align: center;
-      padding: 30px;
+      padding: 40px;
     }
-    table {
-      margin: 30px auto;
-      border-collapse: collapse;
-      width: 90%;
-      max-width: 1000px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-      background: #fff;
-      border-radius: 10px;
+
+    h1 {
+      color: #FFD60A;
+      font-weight: 700;
+      text-shadow: 0 0 10px rgba(255,214,10,0.4);
+      margin-bottom: 20px;
+      animation: aparecer 1.5s ease;
+    }
+
+    @keyframes aparecer {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    table.dataTable {
+      border-radius: 15px;
       overflow: hidden;
+      box-shadow: 0 0 30px rgba(0,0,0,0.1);
+      background: #fff;
+      transition: transform 0.3s ease;
     }
-    th, td {
-      padding: 12px 18px;
-      border-bottom: 1px solid #ddd;
+
+    table.dataTable:hover {
+      transform: scale(1.01);
     }
+
     th {
-      background: #FFD60A;
+      background-color: #FFD60A;
       color: #111;
       font-weight: 600;
+      text-transform: uppercase;
     }
-    tr:hover {
-      background-color: #f9f9f9;
+
+    .dataTables_wrapper .dataTables_filter input {
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      padding: 6px 12px;
+      transition: all 0.3s ease;
+    }
+
+    .dataTables_wrapper .dataTables_filter input:focus {
+      border-color: #FFD60A;
+      box-shadow: 0 0 10px rgba(255,214,10,0.3);
+      outline: none;
+    }
+
+    .loader {
+      margin-top: 50px;
+      width: 60px;
+      height: 60px;
+      border: 6px solid #eee;
+      border-top: 6px solid #FFD60A;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
-  <h1>📊 Datos desde Redash</h1>
-  <table id="tabla">
+  <h1>📊 Tiempos por Picker</h1>
+  <div id="loader" class="loader"></div>
+  <table id="tabla" class="display" style="width:100%; display:none;">
     <thead>
       <tr>
         <th>Fecha</th>
@@ -51,22 +97,18 @@
         <th>Handing</th>
       </tr>
     </thead>
-    <tbody id="cuerpoTabla"><tr><td colspan="8">Cargando datos...</td></tr></tbody>
+    <tbody></tbody>
   </table>
 
   <script>
-    // 👇 Este es tu proxy (InfinityFree)
-    const PROXY_URL = "https://api.allorigins.win/raw?url=" + 
-  encodeURIComponent("https://redash.rappi.com/api/queries/104357/results.json?api_key=c4bIbtzoBQm9k634aukVeD1JNCjlyOmIjXcrqYzK");
-
+    const PROXY_URL = "https://proxy-eight-taupe-93.vercel.app/api/proxy";
 
     async function cargarDatos() {
       try {
         const res = await fetch(PROXY_URL);
         const data = await res.json();
         const rows = data.query_result.data.rows;
-        const tbody = document.getElementById("cuerpoTabla");
-        tbody.innerHTML = "";
+        const tbody = document.querySelector("#tabla tbody");
 
         rows.forEach(fila => {
           const tr = document.createElement("tr");
@@ -82,8 +124,20 @@
           `;
           tbody.appendChild(tr);
         });
+
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("tabla").style.display = "table";
+
+        // Inicializa DataTable
+        $("#tabla").DataTable({
+          pageLength: 8,
+          language: {
+            url: "https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json"
+          }
+        });
       } catch (e) {
         console.error("Error cargando:", e);
+        alert("❌ Error al cargar datos desde Redash");
       }
     }
 
