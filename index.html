@@ -3,99 +3,131 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LUM Dashboard Compacto</title>
+  <title>LUM - Panel Visual</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #f9f9f9, #ffffff);
-      color: #111;
       margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      font-family: "Poppins", sans-serif;
+      background: radial-gradient(circle at top, #fff 0%, #f5f5f5 100%);
+      color: #111;
+      overflow: hidden;
     }
 
-    h1 {
-      color: #FFD60A;
-      text-shadow: 0 0 8px rgba(255,214,10,0.4);
-      margin-bottom: 15px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 15px;
-      max-width: 800px;
-      width: 100%;
-    }
-
-    .card {
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    .titulo {
       text-align: center;
-      padding: 10px 0;
-      transition: transform 0.3s;
+      font-size: 2.4rem;
+      color: #FFD60A;
+      margin-top: 25px;
+      font-weight: 700;
+      text-shadow: 0 0 20px rgba(255,214,10,0.4);
+      animation: fadeInDown 1.5s ease;
     }
 
-    .card:hover {
-      transform: scale(1.05);
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .value {
-      font-size: 1.4rem;
+    .contenedor {
+      display: grid;
+      grid-template-rows: 1fr 2fr;
+      height: 100vh;
+      width: 100%;
+      padding: 20px 40px;
+    }
+
+    .kpis {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      gap: 15px;
+      animation: aparecer 2s ease;
+    }
+
+    @keyframes aparecer {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tarjeta {
+      flex: 1;
+      background: #fff;
+      border-radius: 25px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      animation: flotar 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes flotar {
+      from { transform: translateY(0); }
+      to { transform: translateY(-10px); }
+    }
+
+    .valor {
+      font-size: 2.5rem;
       font-weight: 700;
       color: #000;
     }
-
-    .label {
-      font-size: 0.9rem;
-      color: #666;
+    .etiqueta {
+      font-size: 1.1rem;
+      color: #777;
     }
 
-    .charts {
+    .graficos {
       display: flex;
       justify-content: center;
-      gap: 30px;
-      flex-wrap: wrap;
-      margin-top: 25px;
+      align-items: center;
+      gap: 50px;
+      animation: fadeIn 2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     canvas {
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      padding: 10px;
-      max-width: 340px;
+      background: #fff;
+      border-radius: 25px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      padding: 20px;
+      max-width: 500px;
       width: 100%;
+      height: 350px;
     }
 
     .footer {
-      font-size: 0.8rem;
-      color: #999;
-      margin-top: 15px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #aaa;
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
     }
   </style>
 </head>
 <body>
-  <h1>📊 LUM Dashboard</h1>
+  <div class="titulo">📊 LUM Dashboard - Monitoreo en Vivo</div>
 
-  <div class="grid">
-    <div class="card"><div class="value" id="asignacion">0</div><div class="label">Asignación</div></div>
-    <div class="card"><div class="value" id="picking">0</div><div class="label">Picking</div></div>
-    <div class="card"><div class="value" id="inStore">0</div><div class="label">In Store</div></div>
-    <div class="card"><div class="value" id="handing">0</div><div class="label">Handing</div></div>
-    <div class="card"><div class="value" id="ordenes">0</div><div class="label">Órdenes</div></div>
+  <div class="contenedor">
+    <div class="kpis">
+      <div class="tarjeta"><div class="valor" id="asignacion">0</div><div class="etiqueta">Asignación</div></div>
+      <div class="tarjeta"><div class="valor" id="picking">0</div><div class="etiqueta">Picking</div></div>
+      <div class="tarjeta"><div class="valor" id="inStore">0</div><div class="etiqueta">In Store</div></div>
+      <div class="tarjeta"><div class="valor" id="handing">0</div><div class="etiqueta">Handing</div></div>
+      <div class="tarjeta"><div class="valor" id="ordenes">0</div><div class="etiqueta">Órdenes</div></div>
+    </div>
+
+    <div class="graficos">
+      <canvas id="barChart"></canvas>
+      <canvas id="pieChart"></canvas>
+    </div>
   </div>
 
-  <div class="charts">
-    <canvas id="barChart" height="240"></canvas>
-    <canvas id="pieChart" height="240"></canvas>
-  </div>
-
-  <div class="footer">LUM Logistic · Datos Redash · Actualizado en tiempo real</div>
+  <div class="footer">LUM Logistic · Datos en vivo desde Redash · Última actualización automática</div>
 
   <script>
     const PROXY_URL = "https://proxy-eight-taupe-93.vercel.app/api/proxy";
@@ -106,7 +138,7 @@
         const data = await res.json();
         const rows = data.query_result.data.rows;
 
-        if (!rows || !rows.length) return;
+        if (!rows?.length) return;
 
         let totAsign = 0, totPick = 0, totStore = 0, totHand = 0, totOrd = 0;
         rows.forEach(r => {
@@ -127,23 +159,27 @@
         const labels = rows.map(r => r.Picker || "—");
         const pickingData = rows.map(r => parseFloat(r.Picking || 0));
         const storeData = rows.map(r => parseFloat(r.In_Store || 0));
+        const handingData = rows.map(r => parseFloat(r.Handing || 0));
 
+        // Gráfico de barras dinámico
         new Chart(document.getElementById("barChart"), {
           type: "bar",
           data: {
             labels,
             datasets: [
               { label: "Picking", data: pickingData, backgroundColor: "#FFD60A" },
-              { label: "In Store", data: storeData, backgroundColor: "#4dabf7" }
+              { label: "In Store", data: storeData, backgroundColor: "#74C0FC" },
+              { label: "Handing", data: handingData, backgroundColor: "#FF6B6B" }
             ]
           },
           options: {
-            responsive: true,
+            animation: { duration: 2000, easing: "easeOutElastic" },
             plugins: { legend: { position: "bottom" } },
-            scales: { y: { beginAtZero: true, ticks: { stepSize: 0.5 } } }
+            scales: { y: { beginAtZero: true } }
           }
         });
 
+        // Gráfico circular animado
         new Chart(document.getElementById("pieChart"), {
           type: "doughnut",
           data: {
@@ -159,16 +195,18 @@
             }]
           },
           options: {
-            plugins: { legend: { position: "bottom" } },
-            animation: { animateScale: true, animateRotate: true }
+            animation: { animateScale: true, animateRotate: true, duration: 2200 },
+            plugins: { legend: { position: "bottom" } }
           }
         });
-      } catch (e) {
-        console.error("Error cargando:", e);
+      } catch (err) {
+        console.error("Error cargando:", err);
       }
     }
 
+    // 🔁 Actualización automática cada 2 minutos
     cargarDashboard();
+    setInterval(cargarDashboard, 120000);
   </script>
 </body>
 </html>
