@@ -3,15 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Datos desde Redash</title>
+  <title>Redash Data Viewer</title>
   <style>
     body {
-      font-family: "Poppins", sans-serif;
+      font-family: 'Poppins', sans-serif;
       background: #fafafa;
       color: #111;
-      text-align: center;
+      margin: 0;
       padding: 30px;
+      text-align: center;
     }
+
+    h1 {
+      color: #FFD60A;
+      text-shadow: 0 0 5px rgba(255, 214, 10, 0.5);
+    }
+
     table {
       margin: 30px auto;
       border-collapse: collapse;
@@ -22,21 +29,30 @@
       border-radius: 10px;
       overflow: hidden;
     }
+
     th, td {
       padding: 12px 18px;
       border-bottom: 1px solid #ddd;
     }
+
     th {
       background: #FFD60A;
       color: #111;
       font-weight: 600;
     }
+
     tr:hover {
       background-color: #f9f9f9;
+    }
+
+    .error {
+      color: red;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
+
   <h1>📊 Datos desde Redash</h1>
   <table id="tabla">
     <thead>
@@ -51,20 +67,26 @@
         <th>Handing</th>
       </tr>
     </thead>
-    <tbody id="cuerpoTabla"><tr><td colspan="8">Cargando datos...</td></tr></tbody>
+    <tbody id="cuerpoTabla">
+      <tr><td colspan="8">Cargando datos...</td></tr>
+    </tbody>
   </table>
 
+  <div class="error" id="error"></div>
+
   <script>
-    // 👇 Este es tu proxy (InfinityFree)
-    const PROXY_URL = "https://lum.wuaze.com/proxy.php";
+    // 👇 Aquí pegas el link completo de tu Redash
+    const URL_REDASH = "http://redash.rappi.com/api/queries/104357/results.json?api_key=c4bIbtzoBQm9k634aukVeD1JNCjlyOmIjXcrqYzK";
 
     async function cargarDatos() {
       try {
-        const res = await fetch(PROXY_URL);
+        const res = await fetch(URL_REDASH);
+        if (!res.ok) throw new Error("Error al consultar la API de Redash");
         const data = await res.json();
+
         const rows = data.query_result.data.rows;
         const tbody = document.getElementById("cuerpoTabla");
-        tbody.innerHTML = "";
+        tbody.innerHTML = ""; // Limpia la tabla
 
         rows.forEach(fila => {
           const tr = document.createElement("tr");
@@ -80,12 +102,13 @@
           `;
           tbody.appendChild(tr);
         });
-      } catch (e) {
-        console.error("Error cargando:", e);
+      } catch (error) {
+        document.getElementById("error").textContent = "⚠️ Error cargando los datos: " + error.message;
       }
     }
 
     cargarDatos();
   </script>
+
 </body>
 </html>

@@ -155,12 +155,6 @@
       DS_CHAPINERO: { inicio: 3, fin: 20, columnas: [5, 6, 7] }
     };
 
-    // 🔁 Convierte automáticamente los enlaces de Drive
-    function convertirDriveLink(url) {
-      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      return match ? `https://drive.google.com/uc?export=view&id=${match[1]}` : url;
-    }
-
     let index = 0, datos = [];
 
     async function cargarDatos() {
@@ -169,12 +163,12 @@
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
         const conf = RANGOS[tienda];
-        if (!conf) return animarSalida("empleado.html");
+        if (!conf) return siguientePantalla();
 
         datos = filas.slice(conf.inicio, conf.fin).map(f => ({
           nombre: f[conf.columnas[0]]?.trim(),
           mensaje: f[conf.columnas[1]]?.trim(),
-          imagen: convertirDriveLink(f[conf.columnas[2]]?.trim())
+          imagen: f[conf.columnas[2]]?.trim()
         })).filter(x => x.nombre);
 
         setTimeout(() => {
@@ -206,13 +200,13 @@
     }
 
     function animarSalida(destino) {
-      logo.classList.add("hide"); // logo se guarda
+      logo.classList.add("hide"); // logo se guarda al centro
       setTimeout(() => {
-        fadeOverlay.classList.add("activo"); // pantalla blanca
+        fadeOverlay.classList.add("activo"); // pantalla blanca total
         setTimeout(() => {
           window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`;
-        }, 1000);
-      }, 1000);
+        }, 1000); // espera un instante en blanco
+      }, 1000); // espera a que el logo se guarde
     }
 
     function lanzarConfeti() {
