@@ -3,145 +3,160 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📊 Dashboard - Redash</title>
-
-  <!-- DataTables + jQuery -->
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css">
-  <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
-
-  <!-- Animaciones y estilo -->
+  <title>Dashboard LUM - Redash</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #f9f9f9, #ffffff);
+      background: #f8f9fa;
       color: #111;
-      text-align: center;
-      padding: 40px;
+      margin: 0;
+      padding: 20px;
     }
 
     h1 {
+      text-align: center;
       color: #FFD60A;
-      font-weight: 700;
       text-shadow: 0 0 10px rgba(255,214,10,0.4);
-      margin-bottom: 20px;
-      animation: aparecer 1.5s ease;
     }
 
-    @keyframes aparecer {
-      from {opacity: 0; transform: translateY(-20px);}
-      to {opacity: 1; transform: translateY(0);}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
     }
 
-    table.dataTable {
-      border-radius: 15px;
-      overflow: hidden;
-      box-shadow: 0 0 30px rgba(0,0,0,0.1);
-      background: #fff;
-      transition: transform 0.3s ease;
-    }
-
-    table.dataTable:hover {
-      transform: scale(1.01);
-    }
-
-    th {
-      background-color: #FFD60A;
-      color: #111;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
-    .dataTables_wrapper .dataTables_filter input {
+    .card {
+      background: white;
       border-radius: 20px;
-      border: 1px solid #ccc;
-      padding: 6px 12px;
-      transition: all 0.3s ease;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      padding: 20px;
+      text-align: center;
+      transition: transform 0.3s;
     }
 
-    .dataTables_wrapper .dataTables_filter input:focus {
-      border-color: #FFD60A;
-      box-shadow: 0 0 10px rgba(255,214,10,0.3);
-      outline: none;
+    .card:hover {
+      transform: translateY(-5px);
     }
 
-    .loader {
-      margin-top: 50px;
-      width: 60px;
-      height: 60px;
-      border: 6px solid #eee;
-      border-top: 6px solid #FFD60A;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      display: inline-block;
+    .value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #000;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .label {
+      font-size: 1rem;
+      color: #666;
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 40px;
+      margin-top: 40px;
+      padding: 0 40px;
+    }
+
+    canvas {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+      padding: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>📊 Tiempos por Picker</h1>
-  <div id="loader" class="loader"></div>
-  <table id="tabla" class="display" style="width:100%; display:none;">
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Tienda</th>
-        <th>Picker</th>
-        <th>Órdenes</th>
-        <th>Asignación a Picker</th>
-        <th>Picking</th>
-        <th>In Store</th>
-        <th>Handing</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <h1>📊 Dashboard General - LUM</h1>
+
+  <div class="grid">
+    <div class="card"><div class="value" id="asignacion">0</div><div class="label">Asignación a Picker</div></div>
+    <div class="card"><div class="value" id="picking">0</div><div class="label">Picking</div></div>
+    <div class="card"><div class="value" id="inStore">0</div><div class="label">In Store</div></div>
+    <div class="card"><div class="value" id="handing">0</div><div class="label">Handing</div></div>
+    <div class="card"><div class="value" id="ordenes">0</div><div class="label">Órdenes</div></div>
+  </div>
+
+  <div class="charts">
+    <canvas id="barChart"></canvas>
+    <canvas id="pieChart"></canvas>
+  </div>
 
   <script>
     const PROXY_URL = "https://proxy-eight-taupe-93.vercel.app/api/proxy";
 
-    async function cargarDatos() {
-      try {
-        const res = await fetch(PROXY_URL);
-        const data = await res.json();
-        const rows = data.query_result.data.rows;
-        const tbody = document.querySelector("#tabla tbody");
+    async function cargarDashboard() {
+      const res = await fetch(PROXY_URL);
+      const data = await res.json();
+      const rows = data.query_result.data.rows;
 
-        rows.forEach(fila => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${fila.Fecha || ""}</td>
-            <td>${fila.Tienda || ""}</td>
-            <td>${fila.Picker || ""}</td>
-            <td>${fila.Ordenes || ""}</td>
-            <td>${fila.Asignacion_a_Picker || ""}</td>
-            <td>${fila.Picking || ""}</td>
-            <td>${fila.In_Store || ""}</td>
-            <td>${fila.Handing || ""}</td>
-          `;
-          tbody.appendChild(tr);
-        });
+      if (!rows || !rows.length) return;
 
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("tabla").style.display = "table";
+      // Calcular promedios
+      let totAsign = 0, totPick = 0, totStore = 0, totHand = 0, totOrd = 0;
+      rows.forEach(r => {
+        totAsign += parseFloat(r.Asignacion_a_Picker || 0);
+        totPick += parseFloat(r.Picking || 0);
+        totStore += parseFloat(r.In_Store || 0);
+        totHand += parseFloat(r.Handing || 0);
+        totOrd += parseFloat(r.Ordenes || 0);
+      });
 
-        // Inicializa DataTable
-        $("#tabla").DataTable({
-          pageLength: 8,
-          language: {
-            url: "https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json"
-          }
-        });
-      } catch (e) {
-        console.error("Error cargando:", e);
-        alert("❌ Error al cargar datos desde Redash");
-      }
+      const n = rows.length;
+      document.getElementById("asignacion").innerText = (totAsign / n).toFixed(2);
+      document.getElementById("picking").innerText = (totPick / n).toFixed(2);
+      document.getElementById("inStore").innerText = (totStore / n).toFixed(2);
+      document.getElementById("handing").innerText = (totHand / n).toFixed(2);
+      document.getElementById("ordenes").innerText = totOrd;
+
+      // Datos para gráficas
+      const labels = rows.map(r => r.Picker || "Sin nombre");
+      const pickingData = rows.map(r => parseFloat(r.Picking || 0));
+      const storeData = rows.map(r => parseFloat(r.In_Store || 0));
+      const handingData = rows.map(r => parseFloat(r.Handing || 0));
+
+      // Gráfico de barras
+      new Chart(document.getElementById("barChart"), {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            { label: "Picking", data: pickingData, backgroundColor: "#FFD60A" },
+            { label: "In Store", data: storeData, backgroundColor: "#74C0FC" },
+            { label: "Handing", data: handingData, backgroundColor: "#FF6B6B" }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: "top" } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      // Gráfico circular
+      new Chart(document.getElementById("pieChart"), {
+        type: "doughnut",
+        data: {
+          labels: ["Asignación", "Picking", "In Store", "Handing"],
+          datasets: [{
+            data: [
+              (totAsign / n).toFixed(2),
+              (totPick / n).toFixed(2),
+              (totStore / n).toFixed(2),
+              (totHand / n).toFixed(2)
+            ],
+            backgroundColor: ["#FFD60A", "#74C0FC", "#FF6B6B", "#51CF66"]
+          }]
+        },
+        options: {
+          plugins: { legend: { position: "bottom" } },
+          animation: { animateScale: true }
+        }
+      });
     }
 
-    cargarDatos();
+    cargarDashboard();
   </script>
 </body>
 </html>
