@@ -3,75 +3,87 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard LUM - Redash</title>
+  <title>LUM Dashboard Compacto</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: "Poppins", sans-serif;
-      background: #f8f9fa;
+      background: linear-gradient(135deg, #f9f9f9, #ffffff);
       color: #111;
       margin: 0;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     h1 {
-      text-align: center;
       color: #FFD60A;
-      text-shadow: 0 0 10px rgba(255,214,10,0.4);
+      text-shadow: 0 0 8px rgba(255,214,10,0.4);
+      margin-bottom: 15px;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      margin-top: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 15px;
+      max-width: 800px;
+      width: 100%;
     }
 
     .card {
       background: white;
-      border-radius: 20px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
       text-align: center;
+      padding: 10px 0;
       transition: transform 0.3s;
     }
 
     .card:hover {
-      transform: translateY(-5px);
+      transform: scale(1.05);
     }
 
     .value {
-      font-size: 2rem;
+      font-size: 1.4rem;
       font-weight: 700;
       color: #000;
     }
 
     .label {
-      font-size: 1rem;
+      font-size: 0.9rem;
       color: #666;
     }
 
     .charts {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-      gap: 40px;
-      margin-top: 40px;
-      padding: 0 40px;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin-top: 25px;
     }
 
     canvas {
       background: white;
-      border-radius: 20px;
-      box-shadow: 0 5px 25px rgba(0,0,0,0.08);
-      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 10px;
+      max-width: 340px;
+      width: 100%;
+    }
+
+    .footer {
+      font-size: 0.8rem;
+      color: #999;
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
-  <h1>📊 Dashboard General - LUM</h1>
+  <h1>📊 LUM Dashboard</h1>
 
   <div class="grid">
-    <div class="card"><div class="value" id="asignacion">0</div><div class="label">Asignación a Picker</div></div>
+    <div class="card"><div class="value" id="asignacion">0</div><div class="label">Asignación</div></div>
     <div class="card"><div class="value" id="picking">0</div><div class="label">Picking</div></div>
     <div class="card"><div class="value" id="inStore">0</div><div class="label">In Store</div></div>
     <div class="card"><div class="value" id="handing">0</div><div class="label">Handing</div></div>
@@ -79,81 +91,81 @@
   </div>
 
   <div class="charts">
-    <canvas id="barChart"></canvas>
-    <canvas id="pieChart"></canvas>
+    <canvas id="barChart" height="240"></canvas>
+    <canvas id="pieChart" height="240"></canvas>
   </div>
+
+  <div class="footer">LUM Logistic · Datos Redash · Actualizado en tiempo real</div>
 
   <script>
     const PROXY_URL = "https://proxy-eight-taupe-93.vercel.app/api/proxy";
 
     async function cargarDashboard() {
-      const res = await fetch(PROXY_URL);
-      const data = await res.json();
-      const rows = data.query_result.data.rows;
+      try {
+        const res = await fetch(PROXY_URL);
+        const data = await res.json();
+        const rows = data.query_result.data.rows;
 
-      if (!rows || !rows.length) return;
+        if (!rows || !rows.length) return;
 
-      // Calcular promedios
-      let totAsign = 0, totPick = 0, totStore = 0, totHand = 0, totOrd = 0;
-      rows.forEach(r => {
-        totAsign += parseFloat(r.Asignacion_a_Picker || 0);
-        totPick += parseFloat(r.Picking || 0);
-        totStore += parseFloat(r.In_Store || 0);
-        totHand += parseFloat(r.Handing || 0);
-        totOrd += parseFloat(r.Ordenes || 0);
-      });
+        let totAsign = 0, totPick = 0, totStore = 0, totHand = 0, totOrd = 0;
+        rows.forEach(r => {
+          totAsign += parseFloat(r.Asignacion_a_Picker || 0);
+          totPick += parseFloat(r.Picking || 0);
+          totStore += parseFloat(r.In_Store || 0);
+          totHand += parseFloat(r.Handing || 0);
+          totOrd += parseFloat(r.Ordenes || 0);
+        });
 
-      const n = rows.length;
-      document.getElementById("asignacion").innerText = (totAsign / n).toFixed(2);
-      document.getElementById("picking").innerText = (totPick / n).toFixed(2);
-      document.getElementById("inStore").innerText = (totStore / n).toFixed(2);
-      document.getElementById("handing").innerText = (totHand / n).toFixed(2);
-      document.getElementById("ordenes").innerText = totOrd;
+        const n = rows.length;
+        document.getElementById("asignacion").innerText = (totAsign / n).toFixed(2);
+        document.getElementById("picking").innerText = (totPick / n).toFixed(2);
+        document.getElementById("inStore").innerText = (totStore / n).toFixed(2);
+        document.getElementById("handing").innerText = (totHand / n).toFixed(2);
+        document.getElementById("ordenes").innerText = totOrd;
 
-      // Datos para gráficas
-      const labels = rows.map(r => r.Picker || "Sin nombre");
-      const pickingData = rows.map(r => parseFloat(r.Picking || 0));
-      const storeData = rows.map(r => parseFloat(r.In_Store || 0));
-      const handingData = rows.map(r => parseFloat(r.Handing || 0));
+        const labels = rows.map(r => r.Picker || "—");
+        const pickingData = rows.map(r => parseFloat(r.Picking || 0));
+        const storeData = rows.map(r => parseFloat(r.In_Store || 0));
 
-      // Gráfico de barras
-      new Chart(document.getElementById("barChart"), {
-        type: "bar",
-        data: {
-          labels,
-          datasets: [
-            { label: "Picking", data: pickingData, backgroundColor: "#FFD60A" },
-            { label: "In Store", data: storeData, backgroundColor: "#74C0FC" },
-            { label: "Handing", data: handingData, backgroundColor: "#FF6B6B" }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { position: "top" } },
-          scales: { y: { beginAtZero: true } }
-        }
-      });
+        new Chart(document.getElementById("barChart"), {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              { label: "Picking", data: pickingData, backgroundColor: "#FFD60A" },
+              { label: "In Store", data: storeData, backgroundColor: "#4dabf7" }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { position: "bottom" } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 0.5 } } }
+          }
+        });
 
-      // Gráfico circular
-      new Chart(document.getElementById("pieChart"), {
-        type: "doughnut",
-        data: {
-          labels: ["Asignación", "Picking", "In Store", "Handing"],
-          datasets: [{
-            data: [
-              (totAsign / n).toFixed(2),
-              (totPick / n).toFixed(2),
-              (totStore / n).toFixed(2),
-              (totHand / n).toFixed(2)
-            ],
-            backgroundColor: ["#FFD60A", "#74C0FC", "#FF6B6B", "#51CF66"]
-          }]
-        },
-        options: {
-          plugins: { legend: { position: "bottom" } },
-          animation: { animateScale: true }
-        }
-      });
+        new Chart(document.getElementById("pieChart"), {
+          type: "doughnut",
+          data: {
+            labels: ["Asignación", "Picking", "In Store", "Handing"],
+            datasets: [{
+              data: [
+                (totAsign / n).toFixed(2),
+                (totPick / n).toFixed(2),
+                (totStore / n).toFixed(2),
+                (totHand / n).toFixed(2)
+              ],
+              backgroundColor: ["#FFD60A", "#74C0FC", "#FF6B6B", "#69DB7C"]
+            }]
+          },
+          options: {
+            plugins: { legend: { position: "bottom" } },
+            animation: { animateScale: true, animateRotate: true }
+          }
+        });
+      } catch (e) {
+        console.error("Error cargando:", e);
+      }
     }
 
     cargarDashboard();
