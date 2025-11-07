@@ -1,212 +1,55 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LUM - Panel Visual</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seleccionar Tienda - LUM</title>
   <style>
-    * { box-sizing: border-box; }
     body {
-      margin: 0;
       font-family: "Poppins", sans-serif;
-      background: radial-gradient(circle at top, #fff 0%, #f5f5f5 100%);
-      color: #111;
-      overflow: hidden;
-    }
-
-    .titulo {
-      text-align: center;
-      font-size: 2.4rem;
-      color: #FFD60A;
-      margin-top: 25px;
-      font-weight: 700;
-      text-shadow: 0 0 20px rgba(255,214,10,0.4);
-      animation: fadeInDown 1.5s ease;
-    }
-
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .contenedor {
-      display: grid;
-      grid-template-rows: 1fr 2fr;
+      background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
       height: 100vh;
-      width: 100%;
-      padding: 20px 40px;
-    }
-
-    .kpis {
+      margin: 0;
       display: flex;
-      justify-content: space-around;
       align-items: center;
-      gap: 15px;
-      animation: aparecer 2s ease;
-    }
-
-    @keyframes aparecer {
-      from { opacity: 0; transform: translateY(50px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .tarjeta {
-      flex: 1;
-      background: #fff;
-      border-radius: 25px;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-      animation: flotar 3s ease-in-out infinite alternate;
-    }
-
-    @keyframes flotar {
-      from { transform: translateY(0); }
-      to { transform: translateY(-10px); }
-    }
-
-    .valor {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #000;
-    }
-    .etiqueta {
-      font-size: 1.1rem;
-      color: #777;
-    }
-
-    .graficos {
-      display: flex;
       justify-content: center;
-      align-items: center;
-      gap: 50px;
-      animation: fadeIn 2s ease;
+      flex-direction: column;
     }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+    select, button {
+      font-size: 1.1rem;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 2px solid #FFD60A;
+      margin: 10px;
     }
-
-    canvas {
-      background: #fff;
-      border-radius: 25px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-      padding: 20px;
-      max-width: 500px;
-      width: 100%;
-      height: 350px;
+    button {
+      background: #FFD60A;
+      color: #000;
+      cursor: pointer;
+      transition: 0.3s;
     }
-
-    .footer {
-      text-align: center;
-      font-size: 0.9rem;
-      color: #aaa;
-      position: absolute;
-      bottom: 10px;
-      width: 100%;
-    }
+    button:hover { background: #000; color: #FFD60A; }
   </style>
 </head>
 <body>
-  <div class="titulo">📊 LUM Dashboard - Monitoreo en Vivo</div>
-
-  <div class="contenedor">
-    <div class="kpis">
-      <div class="tarjeta"><div class="valor" id="asignacion">0</div><div class="etiqueta">Asignación</div></div>
-      <div class="tarjeta"><div class="valor" id="picking">0</div><div class="etiqueta">Picking</div></div>
-      <div class="tarjeta"><div class="valor" id="inStore">0</div><div class="etiqueta">In Store</div></div>
-      <div class="tarjeta"><div class="valor" id="handing">0</div><div class="etiqueta">Handing</div></div>
-      <div class="tarjeta"><div class="valor" id="ordenes">0</div><div class="etiqueta">Órdenes</div></div>
-    </div>
-
-    <div class="graficos">
-      <canvas id="barChart"></canvas>
-      <canvas id="pieChart"></canvas>
-    </div>
-  </div>
-
-  <div class="footer">LUM Logistic · Datos en vivo desde Redash · Última actualización automática</div>
+  <h1>🎉 Pantalla Informativa - Selecciona tu tienda</h1>
+  <select id="tienda">
+    <option value="">-- Elegir Tienda --</option>
+    <option value="DS_SIERRA">DS Sierra</option>
+    <option value="DS_CHAPINERO">DS Chapinero</option>
+  </select>
+  <button onclick="irATienda()">Ingresar</button>
 
   <script>
-    const PROXY_URL = "https://proxy-eight-taupe-93.vercel.app/api/proxy";
+  function irATienda() {
+    const tienda = document.getElementById("tienda").value;
+    if (!tienda) return alert("Por favor selecciona una tienda");
 
-    async function cargarDashboard() {
-      try {
-        const res = await fetch(PROXY_URL);
-        const data = await res.json();
-        const rows = data.query_result.data.rows;
+    // Redirección explícita con ruta absoluta para mantener parámetros
+    const base = window.location.origin + window.location.pathname.replace("index.html", "");
+    window.location.href = base + `cumple.html?tienda=${encodeURIComponent(tienda)}`;
+  }
+</script>
 
-        if (!rows?.length) return;
-
-        let totAsign = 0, totPick = 0, totStore = 0, totHand = 0, totOrd = 0;
-        rows.forEach(r => {
-          totAsign += parseFloat(r.Asignacion_a_Picker || 0);
-          totPick += parseFloat(r.Picking || 0);
-          totStore += parseFloat(r.In_Store || 0);
-          totHand += parseFloat(r.Handing || 0);
-          totOrd += parseFloat(r.Ordenes || 0);
-        });
-
-        const n = rows.length;
-        document.getElementById("asignacion").innerText = (totAsign / n).toFixed(2);
-        document.getElementById("picking").innerText = (totPick / n).toFixed(2);
-        document.getElementById("inStore").innerText = (totStore / n).toFixed(2);
-        document.getElementById("handing").innerText = (totHand / n).toFixed(2);
-        document.getElementById("ordenes").innerText = totOrd;
-
-        const labels = rows.map(r => r.Picker || "—");
-        const pickingData = rows.map(r => parseFloat(r.Picking || 0));
-        const storeData = rows.map(r => parseFloat(r.In_Store || 0));
-        const handingData = rows.map(r => parseFloat(r.Handing || 0));
-
-        // Gráfico de barras dinámico
-        new Chart(document.getElementById("barChart"), {
-          type: "bar",
-          data: {
-            labels,
-            datasets: [
-              { label: "Picking", data: pickingData, backgroundColor: "#FFD60A" },
-              { label: "In Store", data: storeData, backgroundColor: "#74C0FC" },
-              { label: "Handing", data: handingData, backgroundColor: "#FF6B6B" }
-            ]
-          },
-          options: {
-            animation: { duration: 2000, easing: "easeOutElastic" },
-            plugins: { legend: { position: "bottom" } },
-            scales: { y: { beginAtZero: true } }
-          }
-        });
-
-        // Gráfico circular animado
-        new Chart(document.getElementById("pieChart"), {
-          type: "doughnut",
-          data: {
-            labels: ["Asignación", "Picking", "In Store", "Handing"],
-            datasets: [{
-              data: [
-                (totAsign / n).toFixed(2),
-                (totPick / n).toFixed(2),
-                (totStore / n).toFixed(2),
-                (totHand / n).toFixed(2)
-              ],
-              backgroundColor: ["#FFD60A", "#74C0FC", "#FF6B6B", "#69DB7C"]
-            }]
-          },
-          options: {
-            animation: { animateScale: true, animateRotate: true, duration: 2200 },
-            plugins: { legend: { position: "bottom" } }
-          }
-        });
-      } catch (err) {
-        console.error("Error cargando:", err);
-      }
-    }
-
-    // 🔁 Actualización automática cada 2 minutos
-    cargarDashboard();
-    setInterval(cargarDashboard, 120000);
-  </script>
 </body>
 </html>
