@@ -1,55 +1,212 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Seleccionar Tienda - LUM</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cumpleaños - LUM</title>
   <style>
     body {
-      font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
-      height: 100vh;
       margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: radial-gradient(circle at top left, #fff 0%, #f7f7f7 100%);
+      height: 100vh;
       display: flex;
+      justify-content: space-evenly;
       align-items: center;
-      justify-content: center;
-      flex-direction: column;
+      overflow: hidden;
+      position: relative;
     }
-    select, button {
-      font-size: 1.1rem;
-      padding: 10px 20px;
-      border-radius: 10px;
-      border: 2px solid #FFD60A;
-      margin: 10px;
+
+    .corner-black {
+      position: absolute; top: 0; left: 0;
+      width: 0; height: 0;
+      border-left: 260px solid #000;
+      border-bottom: 230px solid transparent;
+      z-index: 1;
     }
-    button {
-      background: #FFD60A;
-      color: #000;
-      cursor: pointer;
-      transition: 0.3s;
+    .corner-yellow {
+      position: absolute; bottom: 0; right: 0;
+      width: 0; height: 0;
+      border-right: 200px solid #FFD60A;
+      border-top: 180px solid transparent;
+      z-index: 1;
     }
-    button:hover { background: #000; color: #FFD60A; }
+
+    .logo {
+      position: absolute;
+      top: 30px; left: 40px;
+      width: 100px;
+      z-index: 5;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.9);
+      border-radius: 25px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.1);
+      text-align: center;
+      padding: 35px 25px;
+      width: 330px;
+      border: 2px solid #eee;
+      z-index: 5;
+      transition: all 0.8s ease;
+    }
+
+    .photo {
+      width: 150px; height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 6px solid #FFD60A;
+      margin-bottom: 10px;
+      transition: all 0.8s ease;
+      background: #fff;
+      box-shadow: 0 0 25px rgba(255,214,10,0.4);
+    }
+
+    .nombre { font-size: 1.3rem; font-weight: 700; color: #000; }
+    .mensaje { font-size: 1rem; color: #555; font-style: italic; margin-top: 8px; }
+    .fecha { font-size: 0.9rem; color: #888; margin-top: 10px; }
+
+    .hoy {
+      animation: brillar 1.2s infinite alternate;
+      border-color: #FFD60A;
+      box-shadow: 0 0 40px 10px rgba(255,214,10,0.7);
+    }
+
+    @keyframes brillar {
+      0% { transform: scale(1); filter: brightness(1); }
+      100% { transform: scale(1.05); filter: brightness(1.25); }
+    }
+
+    h2 {
+      color: #FFD60A;
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px rgba(255,214,10,0.3);
+    }
+
+    canvas#confetti {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
   </style>
 </head>
 <body>
-  <h1>🎉 Pantalla Informativa - Selecciona tu tienda</h1>
-  <select id="tienda">
-    <option value="">-- Elegir Tienda --</option>
-    <option value="DS_SIERRA">DS Chico</option>
-    <option value="DS_CHAPINERO">DS Chapinero</option>
-  </select>
-  <button onclick="irATienda()">Ingresar</button>
+  <div class="corner-black"></div>
+  <div class="corner-yellow"></div>
+  <img src="img/logo.png" alt="Logo LUM" class="logo">
+  <canvas id="confetti"></canvas>
+
+  <div class="card" id="ultimo"><h2>🎉 Último Cumpleaños</h2><p>Cargando...</p></div>
+  <div class="card" id="hoy" style="display:none;"><h2>🎂 Hoy</h2></div>
+  <div class="card" id="proximo"><h2>🎁 Próximo Cumpleaños</h2><p>Cargando...</p></div>
 
   <script>
-  function irATienda() {
-    const tienda = document.getElementById("tienda").value;
-    if (!tienda) return alert("Por favor selecciona una tienda");
+    const SHEET_URL =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
 
-    // Redirección explícita con ruta absoluta para mantener parámetros
-    const base = window.location.origin + window.location.pathname.replace("index.html", "");
-    window.location.href = base + `cumple.html?tienda=${encodeURIComponent(tienda)}`;
-  }
-</script>
+    const tienda = new URLSearchParams(window.location.search).get("tienda");
 
+    const RANGOS = {
+      DS_CHICO: { inicio: 3, fin: 10, columnas: [0, 1, 2, 3] },
+      DS_SIERRA: { inicio: 3, fin: 20, columnas: [5, 6, 7, 8] }
+    };
+
+    async function cargarCumples() {
+      try {
+        const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
+        const text = await res.text();
+        const filas = text.trim().split("\n").map(f => f.split("\t"));
+        const conf = RANGOS[tienda];
+        if (!conf) return;
+
+        const datos = filas.slice(conf.inicio, conf.fin).map(f => ({
+          nombre: f[conf.columnas[0]]?.trim(),
+          mensaje: f[conf.columnas[1]]?.trim(),
+          imagen: f[conf.columnas[2]]?.trim(),
+          fecha: f[conf.columnas[3]]?.trim()
+        })).filter(x => x.nombre && x.fecha);
+
+        const hoy = new Date();
+        const hoyMD = ("0" + (hoy.getMonth() + 1)).slice(-2) + "-" + ("0" + hoy.getDate()).slice(-2);
+
+        const normalizar = f => {
+          const d = new Date(f);
+          return ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+        };
+
+        // Clasificar cumpleaños
+        const pasados = datos.filter(d => normalizar(d.fecha) < hoyMD);
+        const futuros = datos.filter(d => normalizar(d.fecha) > hoyMD);
+        const hoyes = datos.filter(d => normalizar(d.fecha) === hoyMD);
+
+        const ultimo = pasados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0];
+        const proximo = futuros.sort((a, b) => new Date(a.fecha) - new Date(b.fecha))[0];
+        const cumpleHoy = hoyes.length ? hoyes[0] : null;
+
+        if (ultimo) mostrar("ultimo", ultimo);
+        if (proximo) mostrar("proximo", proximo);
+        if (cumpleHoy) mostrarHoy(cumpleHoy);
+      } catch (e) {
+        console.error("Error cargando cumpleaños:", e);
+      }
+    }
+
+    function mostrar(id, d) {
+      const el = document.getElementById(id);
+      el.innerHTML = `
+        <h2>${el.querySelector("h2").innerText}</h2>
+        <img src="${d.imagen}" class="photo" alt="${d.nombre}">
+        <div class="nombre">${d.nombre}</div>
+        <div class="mensaje">${d.mensaje}</div>
+        <div class="fecha">${new Date(d.fecha).toLocaleDateString("es-CO", {
+          year: "numeric", month: "long", day: "numeric"
+        })}</div>
+      `;
+    }
+
+    function mostrarHoy(d) {
+      const el = document.getElementById("hoy");
+      el.style.display = "block";
+      el.innerHTML = `
+        <h2>🎉 ¡Hoy Cumple! 🎉</h2>
+        <img src="${d.imagen}" class="photo hoy" alt="${d.nombre}">
+        <div class="nombre">${d.nombre}</div>
+        <div class="mensaje">${d.mensaje}</div>
+        <div class="fecha">${new Date(d.fecha).toLocaleDateString("es-CO", {
+          year: "numeric", month: "long", day: "numeric"
+        })}</div>
+      `;
+      lanzarConfeti(150); // más confeti si cumple hoy
+    }
+
+    function lanzarConfeti(cantidad = 70) {
+      const canvas = document.getElementById("confetti");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const p = Array.from({ length: cantidad }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * -canvas.height,
+        r: Math.random() * 6 + 2,
+        d: Math.random() * 20 + 10,
+        color: `hsl(${Math.random() * 60 + 40},100%,50%)`
+      }));
+      (function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const o of p) {
+          ctx.fillStyle = o.color;
+          ctx.fillRect(o.x, o.y, o.r, o.r);
+          o.y += Math.cos(o.d) + 2;
+          o.x += Math.sin(o.d);
+          if (o.y > canvas.height) o.y = 0;
+        }
+        requestAnimationFrame(draw);
+      })();
+    }
+
+    cargarCumples();
+  </script>
 </body>
 </html>
