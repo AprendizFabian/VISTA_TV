@@ -71,7 +71,6 @@
 
     canvas#confetti { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
 
-    /* Pantalla de carga inicial */
     .carga {
       position: fixed;
       top: 0; left: 0;
@@ -84,19 +83,10 @@
       opacity: 1;
       transition: opacity 1s ease;
     }
-    .carga img {
-      width: 350px;
-      max-width: 80%;
-      animation: aparecer 2s ease;
-    }
-    @keyframes aparecer {
-      0% { opacity: 0; transform: scale(0.9); }
-      50% { opacity: 1; transform: scale(1.05); }
-      100% { opacity: 1; transform: scale(1); }
-    }
+    .carga img { width: 350px; max-width: 80%; animation: aparecer 2s ease; }
+    @keyframes aparecer { 0% { opacity: 0; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
     .carga.oculta { opacity: 0; pointer-events: none; }
 
-    /* Fusión blanca entre pantallas */
     .fade-overlay {
       position: fixed;
       top: 0; left: 0;
@@ -120,10 +110,7 @@
   <div class="corner-black"></div>
   <div class="corner-yellow"></div>
   <img src="img/logo.png" alt="Logo LUM" class="logo" id="logo">
-  <div class="container" id="contenedor">
-    <h1 class="title">🏆 Empleado del Mes</h1>
-    <p>Cargando...</p>
-  </div>
+  <div class="container" id="contenedor"></div>
 
   <script>
     const SHEET_URL =
@@ -145,7 +132,7 @@
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
         const conf = RANGOS[tienda];
-        if (!conf) return siguientePantalla();
+        if (!conf) return soloLogo();
 
         const fila = filas[conf.filaEmpleado] || [];
         const e = {
@@ -158,7 +145,7 @@
           pantallaCarga.classList.add("oculta");
 
           if (!e.nombre && !e.mensaje && !e.imagen) {
-            setTimeout(() => transicion("motivacional.html"), 2000);
+            soloLogo();
             return;
           }
 
@@ -170,22 +157,27 @@
             <div class="mensaje">${e.mensaje || "Por su excelente desempeño"}</div>`;
           lanzarConfeti();
 
-          // Después de 30s → logo se guarda + fusión blanca
           setTimeout(() => animarSalida("motivacional.html"), 30000);
         }, 2000);
       } catch {
-        setTimeout(() => animarSalida("motivacional.html"), 2000);
+        soloLogo();
       }
     }
 
+    function soloLogo() {
+      pantallaCarga.classList.add("oculta");
+      cont.innerHTML = ""; // sin texto ni imagen
+      setTimeout(() => animarSalida("motivacional.html"), 5000);
+    }
+
     function animarSalida(destino) {
-      logo.classList.add("hide"); // el logo se encoge al centro
+      logo.classList.add("hide");
       setTimeout(() => {
-        fadeOverlay.classList.add("activo"); // pantalla se vuelve blanca
+        fadeOverlay.classList.add("activo");
         setTimeout(() => {
           window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`;
-        }, 1000); // mantiene blanco un instante
-      }, 1000); // espera que el logo termine su animación
+        }, 1000);
+      }, 1000);
     }
 
     function lanzarConfeti() {
