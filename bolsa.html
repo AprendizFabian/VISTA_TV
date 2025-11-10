@@ -14,6 +14,7 @@
       height: 100vh;
       overflow: hidden;
       font-family: "Poppins", sans-serif;
+      position: relative;
     }
 
     .corner-black {
@@ -51,5 +52,14 @@
   <div class="corner-yellow"></div>
   <img src="img/logo.png" alt="LUM" class="logo">
   <img src="img/bolsas.jpeg" alt="Instrucciones de Bolsas" class="img">
+
+  <script>
+    const tienda = new URLSearchParams(window.location.search).get("tienda");
+    
+    // ⏱️ Espera 20 segundos y vuelve al cumple
+    setTimeout(() => {
+      window.location.href = `cumple.html?tienda=${encodeURIComponent(tienda)}`;
+    }, 20000);
+  </script>
 </body>
 </html>
