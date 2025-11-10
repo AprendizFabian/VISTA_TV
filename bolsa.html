@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Uso Correcto de las Bolsas - LUM</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      overflow: hidden;
+      background: #fff;
+      color: #111;
+    }
+
+    /* Pantalla de inicio */
+    .intro {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      opacity: 1;
+      transition: opacity 1.5s ease;
+    }
+    .intro.oculta { opacity: 0; pointer-events: none; }
+    .intro img {
+      width: 250px;
+      animation: zoomIn 2.5s ease;
+    }
+    @keyframes zoomIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Efecto de apagón final */
+    .fade {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      opacity: 0;
+      transition: opacity 1.5s ease;
+      z-index: 999;
+      pointer-events: none;
+    }
+    .fade.activo { opacity: 1; }
+
+    /* Triángulo corporativo + logo */
+    .corner {
+      position: absolute;
+      top: 0; left: 0;
+      width: 0; height: 0;
+      border-left: 200px solid #000;
+      border-bottom: 180px solid transparent;
+      z-index: 10;
+    }
+    .logo {
+      position: absolute;
+      top: 25px; left: 25px;
+      width: 90px;
+      z-index: 11;
+      animation: float 3s ease-in-out infinite alternate;
+    }
+    @keyframes float { from { transform: translateY(0); } to { transform: translateY(6px); } }
+
+    /* Contenedor principal */
+    .slider {
+      display: flex;
+      width: 300%;
+      height: 100vh;
+      transition: transform 1.5s ease-in-out;
+    }
+
+    section {
+      flex: 1 0 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 50px 100px;
+      background: linear-gradient(to right, #fff, #f9f9f9);
+      position: relative;
+    }
+
+    .texto {
+      width: 55%;
+      animation: fadeLeft 1s ease forwards;
+      opacity: 0;
+    }
+
+    .numero {
+      font-size: 4rem;
+      font-weight: 700;
+      color: #FFD60A;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 2rem;
+      color: #000;
+      margin-bottom: 15px;
+    }
+
+    p {
+      color: #333;
+      line-height: 1.5;
+      font-size: 1.1rem;
+    }
+
+    .imagen {
+      width: 35%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: fadeRight 1s ease forwards;
+      opacity: 0;
+    }
+
+    .imagen img {
+      width: 80%;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      border: 4px solid #FFD60A;
+    }
+
+    @keyframes fadeLeft {
+      from { transform: translateX(-80px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes fadeRight {
+      from { transform: translateX(80px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    footer {
+      position: absolute;
+      bottom: 15px;
+      right: 30px;
+      font-size: 0.9rem;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="intro" id="intro">
+    <img src="img/carga.png" alt="LUM LOGISTIC" />
+  </div>
+  <div class="fade" id="fade"></div>
+  <div class="corner"></div>
+  <img src="img/logo.png" alt="Logo" class="logo">
+
+  <div class="slider" id="slider">
+    <section style="background:linear-gradient(90deg,#fff,#fdf7da)">
+      <div class="texto">
+        <div class="numero">1</div>
+        <h2>Bolsas de Maíz</h2>
+        <p>Usar solo en los siguientes casos:<br>
+        - Empaque de productos refrigerados y/o congelados.<br>
+        - Tiempo de lluvia, para proteger los productos.</p>
+      </div>
+      <div class="imagen">
+        <img src="img/bolsa1.png" alt="Bolsas de maíz">
+      </div>
+    </section>
+
+    <section style="background:linear-gradient(90deg,#fff,#fff4bf)">
+      <div class="texto">
+        <div class="numero">2</div>
+        <h2>Uso Consciente de las Bolsas</h2>
+        <p>Usa siempre la menor cantidad de bolsas. Solo las necesarias para proteger la calidad e integridad de tu pedido.</p>
+      </div>
+      <div class="imagen">
+        <img src="img/bolsa2.png" alt="Uso consciente">
+      </div>
+    </section>
+
+    <section style="background:linear-gradient(90deg,#fff,#ffe66d)">
+      <div class="texto">
+        <div class="numero">3</div>
+        <h2>Contaminación Cruzada</h2>
+        <p>Los productos de aseo hogar y aseo personal <b>jamás</b> deben ir con alimentos.</p>
+      </div>
+      <div class="imagen">
+        <img src="/img/bolsa 3.png" alt="Contaminación cruzada">
+      </div>
+    </section>
+  </div>
+
+  <footer>LUM Logistic · Buen uso de recursos · #CuidemosElPlaneta</footer>
+
+  <script>
+    const intro = document.getElementById('intro');
+    const slider = document.getElementById('slider');
+    const fade = document.getElementById('fade');
+    const sections = document.querySelectorAll('section');
+    let index = 0;
+
+    // Animación de inicio
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        intro.classList.add('oculta');
+        iniciarPresentacion();
+      }, 2200);
+    });
+
+    // Animación entre secciones
+    function mostrarSeccion(i) {
+      sections.forEach(sec => {
+        sec.querySelector('.texto').style.opacity = 0;
+        sec.querySelector('.imagen').style.opacity = 0;
+      });
+      slider.style.transform = `translateX(-${i * 100}%)`;
+      setTimeout(() => {
+        const actual = sections[i];
+        actual.querySelector('.texto').style.animation = 'fadeLeft 1s ease forwards';
+        actual.querySelector('.imagen').style.animation = 'fadeRight 1s ease forwards';
+      }, 500);
+    }
+
+    function iniciarPresentacion() {
+      mostrarSeccion(0);
+      const intervalo = setInterval(() => {
+        index++;
+        if (index < sections.length) {
+          mostrarSeccion(index);
+        } else {
+          clearInterval(intervalo);
+          setTimeout(() => {
+            fade.classList.add('activo');
+            setTimeout(() => {
+              window.location.href = "motivacional.html"; // o la siguiente página
+            }, 1000);
+          }, 2000);
+        }
+      }, 8000);
+    }
+  </script>
+</body>
+</html>
