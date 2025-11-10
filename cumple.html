@@ -128,8 +128,8 @@
         const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
-        
-        // Los datos empiezan en fila 3 (índice 2)
+
+        // 🔹 Tus datos reales empiezan en la fila 4 (índice 3)
         const data = filas.slice(3)
           .map(f => ({
             nombre: f[0]?.trim(),
