@@ -94,7 +94,6 @@
       pointer-events: none; z-index: 0;
     }
 
-    /* Pantalla de carga */
     .carga {
       position: fixed;
       top: 0; left: 0;
@@ -142,58 +141,52 @@
   <script>
     const SHEET_URL =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
+
     const tienda = new URLSearchParams(window.location.search).get("tienda");
     const cont = document.getElementById("contenedor");
     const pantallaCarga = document.getElementById("pantallaCarga");
     const fadeOverlay = document.getElementById("fadeOverlay");
     const logo = document.getElementById("logo");
 
-    const RANGOS = {
-      DS_CHICO: { inicio: 3, fin: 20, columnas: [0, 1, 2, 3] },
-      DS_SIERRA: { inicio: 3, fin: 20, columnas: [5, 6, 7, 8] }
-    };
-
-    let index = 0, lista = [];
-
     async function cargarCumples() {
       try {
         const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
-        const conf = RANGOS[tienda];
-        if (!conf) return siguientePantalla();
+        
+        // Busca la cabecera con "Nombre del cumpleañero"
+        const header = filas.findIndex(f => f.includes("Nombre del cumpleañero"));
+        const data = filas.slice(header + 1)
+          .map(f => ({
+            nombre: f[0]?.trim(),
+            mensaje: f[1]?.trim(),
+            imagen: f[2]?.trim(),
+            fecha: f[3]?.trim()
+          }))
+          .filter(x => x.nombre && x.fecha);
 
-        lista = filas.slice(conf.inicio, conf.fin).map(f => ({
-          nombre: f[conf.columnas[0]]?.trim(),
-          mensaje: f[conf.columnas[1]]?.trim(),
-          imagen: f[conf.columnas[2]]?.trim(),
-          fecha: f[conf.columnas[3]]?.trim()
-        })).filter(x => x.nombre && x.fecha);
-
-        if (!lista.length) return animarSalida("empleado.html");
+        if (!data.length) return animarSalida("empleado.html");
 
         const hoy = new Date();
-        const hoyMD = ("0" + (hoy.getMonth()+1)).slice(-2) + "-" + ("0"+hoy.getDate()).slice(-2);
+        const hoyMD = ("0"+(hoy.getMonth()+1)).slice(-2)+"-"+("0"+hoy.getDate()).slice(-2);
         const normalizar = f => {
           const d = new Date(f);
-          return ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0"+d.getDate()).slice(-2);
+          return ("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);
         };
 
-        const pasados = lista.filter(l => normalizar(l.fecha) < hoyMD);
-        const futuros = lista.filter(l => normalizar(l.fecha) > hoyMD);
-
-        const ultimo = pasados.sort((a,b) => new Date(b.fecha) - new Date(a.fecha))[0];
-        const proximo = futuros.sort((a,b) => new Date(a.fecha) - new Date(b.fecha))[0];
+        const pasados = data.filter(d => normalizar(d.fecha) < hoyMD);
+        const futuros = data.filter(d => normalizar(d.fecha) > hoyMD);
+        const ultimo = pasados.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))[0];
+        const proximo = futuros.sort((a,b)=>new Date(a.fecha)-new Date(b.fecha))[0];
 
         pantallaCarga.classList.add("oculta");
         cont.classList.add("visible");
         mostrarCumple(ultimo, "🎉 Último Cumpleaños");
-        setTimeout(() => {
-          mostrarCumple(proximo, "🎁 Próximo Cumpleaños");
-        }, 10000);
-
+        setTimeout(() => mostrarCumple(proximo, "🎁 Próximo Cumpleaños"), 10000);
         setTimeout(() => animarSalida("empleado.html"), 20000);
-      } catch {
+
+      } catch(e) {
+        console.error(e);
         animarSalida("empleado.html");
       }
     }
@@ -224,10 +217,10 @@
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       const p = Array.from({ length: 70 }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * -canvas.height,
-        r: Math.random() * 6 + 2,
-        d: Math.random() * 20 + 10,
+        x: Math.random()*canvas.width,
+        y: Math.random()*-canvas.height,
+        r: Math.random()*6+2,
+        d: Math.random()*20+10,
         color: `hsl(${Math.random()*60+40},100%,50%)`
       }));
       (function draw() {
