@@ -128,7 +128,7 @@
 
           if (frases.length === 0) {
             // No hay datos → pasa a cumpleaños suavemente
-            setTimeout(() => transicion("cumple.html"), 1500);
+            setTimeout(() => transicion("bolsa.html"), 1500);
             return;
           }
 
@@ -137,11 +137,11 @@
           document.getElementById("autor").textContent = aleatoria[1] ? `— ${aleatoria[1].trim()}` : "";
 
           // Después de 30 segundos → transición a cumpleaños
-          setTimeout(() => transicion("cumple.html"), 30000);
+          setTimeout(() => transicion("bolsa.html"), 30000);
         }, 2000);
       } catch (e) {
         console.error("Error al cargar motivacional:", e);
-        setTimeout(() => transicion("cumple.html"), 2000);
+        setTimeout(() => transicion("bolsa.html"), 2000);
       }
     }
 
