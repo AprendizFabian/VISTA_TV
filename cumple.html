@@ -17,41 +17,34 @@
       position: relative;
       color: #111;
     }
-
     .corner-black {
-      position: absolute;
-      top: 0; left: 0;
+      position: absolute; top: 0; left: 0;
       width: 0; height: 0;
       border-left: 260px solid #000;
       border-bottom: 230px solid transparent;
       z-index: 2;
     }
     .corner-yellow {
-      position: absolute;
-      bottom: 0; right: 0;
+      position: absolute; bottom: 0; right: 0;
       width: 0; height: 0;
       border-right: 200px solid #FFD60A;
       border-top: 180px solid transparent;
       z-index: 1;
     }
-
     .logo {
-      position: absolute;
-      top: 30px; left: 40px;
+      position: absolute; top: 30px; left: 40px;
       width: 100px;
       animation: floatLogo 3s ease-in-out infinite alternate;
       z-index: 5;
       transition: transform 1s ease, opacity 1s ease;
     }
-    @keyframes floatLogo { 0% { transform: translateY(0); } 100% { transform: translateY(6px); } }
-
+    @keyframes floatLogo { 0%{transform:translateY(0);}100%{transform:translateY(6px);} }
     .logo.hide {
       transform: scale(0) translate(-50%, -50%);
       opacity: 0;
       position: fixed;
       top: 50%; left: 50%;
     }
-
     .card {
       background: rgba(255,255,255,0.93);
       border-radius: 25px;
@@ -66,61 +59,44 @@
       transition: all 1.2s ease;
     }
     .card.visible { opacity: 1; transform: translateY(0); }
-
     .photo {
       width: 200px; height: 200px;
-      border-radius: 50%;
-      object-fit: cover;
+      border-radius: 50%; object-fit: cover;
       border: 6px solid #FFD60A;
       box-shadow: 0 0 25px rgba(255,214,10,0.5);
       animation: floatImg 5s ease-in-out infinite;
     }
-    @keyframes floatImg { 0%,100% { transform: translateY(6px); } 50% { transform: translateY(-6px); } }
-
+    @keyframes floatImg { 0%,100%{transform:translateY(6px);}50%{transform:translateY(-6px);} }
     .nombre { font-size: 1.8rem; font-weight: 700; margin-top: 20px; }
     .mensaje { font-size: 1.2rem; color: #555; font-style: italic; margin-top: 10px; }
-
     .etiqueta {
-      color: #FFD60A;
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 10px;
-      text-shadow: 0 0 8px rgba(255,214,10,0.4);
+      color: #FFD60A; font-size: 1.2rem; font-weight: 600;
+      margin-bottom: 10px; text-shadow: 0 0 8px rgba(255,214,10,0.4);
     }
-
     canvas#confetti {
       position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
       pointer-events: none; z-index: 0;
     }
-
     .carga {
-      position: fixed;
-      top: 0; left: 0;
+      position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
       background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      transition: opacity 1s ease;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; transition: opacity 1s ease;
     }
     .carga img { width: 320px; animation: aparecer 2s ease; }
     @keyframes aparecer {
-      0% { opacity: 0; transform: scale(0.9); }
-      50% { opacity: 1; transform: scale(1.05); }
-      100% { opacity: 1; transform: scale(1); }
+      0%{opacity:0;transform:scale(0.9);}
+      50%{opacity:1;transform:scale(1.05);}
+      100%{opacity:1;transform:scale(1);}
     }
     .carga.oculta { opacity: 0; pointer-events: none; }
-
     .fade-overlay {
-      position: fixed;
-      top: 0; left: 0;
+      position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
-      background: #fff;
-      opacity: 0;
-      z-index: 999;
-      pointer-events: none;
+      background: #fff; opacity: 0;
+      z-index: 999; pointer-events: none;
       transition: opacity 1.2s ease;
     }
     .fade-overlay.activo { opacity: 1; }
@@ -139,9 +115,7 @@
   <div class="card" id="contenedor"></div>
 
   <script>
-    const SHEET_URL =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
-
+    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
     const tienda = new URLSearchParams(window.location.search).get("tienda");
     const cont = document.getElementById("contenedor");
     const pantallaCarga = document.getElementById("pantallaCarga");
@@ -153,9 +127,9 @@
         const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
-        
-        // Busca la cabecera con "Nombre del cumpleañero"
         const header = filas.findIndex(f => f.includes("Nombre del cumpleañero"));
+        if (header === -1) return animarSalida("empleado.html");
+
         const data = filas.slice(header + 1)
           .map(f => ({
             nombre: f[0]?.trim(),
@@ -181,18 +155,17 @@
 
         pantallaCarga.classList.add("oculta");
         cont.classList.add("visible");
-        mostrarCumple(ultimo, "🎉 Último Cumpleaños");
-        setTimeout(() => mostrarCumple(proximo, "🎁 Próximo Cumpleaños"), 10000);
-        setTimeout(() => animarSalida("empleado.html"), 20000);
 
-      } catch(e) {
-        console.error(e);
+        if (ultimo) mostrarCumple(ultimo, "🎉 Último Cumpleaños");
+        setTimeout(() => { if (proximo) mostrarCumple(proximo, "🎁 Próximo Cumpleaños"); }, 10000);
+        setTimeout(() => animarSalida("empleado.html"), 20000);
+      } catch (e) {
+        console.error("Error al cargar:", e);
         animarSalida("empleado.html");
       }
     }
 
     function mostrarCumple(d, etiqueta) {
-      if (!d) return;
       cont.innerHTML = `
         <div class="etiqueta">${etiqueta}</div>
         <img src="${d.imagen}" class="photo">
@@ -205,9 +178,7 @@
       logo.classList.add("hide");
       setTimeout(() => {
         fadeOverlay.classList.add("activo");
-        setTimeout(() => {
-          window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`;
-        }, 1000);
+        setTimeout(() => window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`, 1000);
       }, 1000);
     }
 
@@ -216,7 +187,7 @@
       const ctx = canvas.getContext("2d");
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      const p = Array.from({ length: 70 }, () => ({
+      const p = Array.from({ length: 80 }, () => ({
         x: Math.random()*canvas.width,
         y: Math.random()*-canvas.height,
         r: Math.random()*6+2,
