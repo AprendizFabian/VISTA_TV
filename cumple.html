@@ -128,8 +128,8 @@
         const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
-
-        // 🔹 Tus datos empiezan en la fila 3, así que saltamos las dos primeras
+        
+        // Los datos empiezan en fila 3 (índice 2)
         const data = filas.slice(3)
           .map(f => ({
             nombre: f[0]?.trim(),
@@ -147,10 +147,8 @@
         data.forEach(d => d.proximo = new Date(thisYear, d.fecha.getMonth(), d.fecha.getDate()));
         data.forEach(d => { if (d.proximo < hoy) d.proximo.setFullYear(thisYear + 1); });
 
-        const ultimo = data.filter(d => d.proximo < hoy)
-                           .sort((a,b)=>b.proximo-a.proximo)[0];
-        const proximo = data.sort((a,b)=>a.proximo-b.proximo)
-                            .find(d => d.proximo >= hoy);
+        const ultimo = data.filter(d => d.proximo < hoy).sort((a,b)=>b.proximo-a.proximo)[0];
+        const proximo = data.sort((a,b)=>a.proximo-b.proximo).find(d => d.proximo >= hoy);
 
         pantallaCarga.classList.add("oculta");
         cont.classList.add("visible");
