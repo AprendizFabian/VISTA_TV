@@ -12,21 +12,23 @@
       height: 100vh;
       display: flex;
       align-items: center;
-      justify-content: space-evenly;
+      justify-content: center;
       overflow: hidden;
-      color: #111;
       position: relative;
+      color: #111;
     }
 
     .corner-black {
-      position: absolute; top: 0; left: 0;
+      position: absolute;
+      top: 0; left: 0;
       width: 0; height: 0;
       border-left: 260px solid #000;
       border-bottom: 230px solid transparent;
-      z-index: 1;
+      z-index: 2;
     }
     .corner-yellow {
-      position: absolute; bottom: 0; right: 0;
+      position: absolute;
+      bottom: 0; right: 0;
       width: 0; height: 0;
       border-right: 200px solid #FFD60A;
       border-top: 180px solid transparent;
@@ -37,44 +39,53 @@
       position: absolute;
       top: 30px; left: 40px;
       width: 100px;
+      animation: floatLogo 3s ease-in-out infinite alternate;
       z-index: 5;
+      transition: transform 1s ease, opacity 1s ease;
+    }
+    @keyframes floatLogo { 0% { transform: translateY(0); } 100% { transform: translateY(6px); } }
+
+    .logo.hide {
+      transform: scale(0) translate(-50%, -50%);
+      opacity: 0;
+      position: fixed;
+      top: 50%; left: 50%;
     }
 
     .card {
-      background: rgba(255,255,255,0.92);
+      background: rgba(255,255,255,0.93);
       border-radius: 25px;
       box-shadow: 0 10px 40px rgba(0,0,0,0.15);
       text-align: center;
-      padding: 40px 30px;
-      width: 400px;
+      padding: 120px 60px 60px;
+      width: 480px;
       border: 1px solid #ddd;
       z-index: 5;
-      transition: transform 1s ease, box-shadow 0.8s ease;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 1.2s ease;
     }
-
-    .card:hover { transform: scale(1.03); }
+    .card.visible { opacity: 1; transform: translateY(0); }
 
     .photo {
-      width: 180px; height: 180px; border-radius: 50%;
-      object-fit: cover; border: 6px solid #FFD60A;
-      box-shadow: 0 0 25px rgba(255,214,10,0.4);
-      background: #fff;
-      transition: all 0.8s ease;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 6px solid #FFD60A;
+      box-shadow: 0 0 25px rgba(255,214,10,0.5);
+      animation: floatImg 5s ease-in-out infinite;
     }
+    @keyframes floatImg { 0%,100% { transform: translateY(6px); } 50% { transform: translateY(-6px); } }
 
-    .nombre { font-size: 1.4rem; font-weight: 700; margin-top: 20px; }
-    .mensaje { font-size: 1.1rem; color: #555; font-style: italic; margin-top: 8px; }
-    .fecha { margin-top: 10px; color: #888; font-size: 0.9rem; }
+    .nombre { font-size: 1.8rem; font-weight: 700; margin-top: 20px; }
+    .mensaje { font-size: 1.2rem; color: #555; font-style: italic; margin-top: 10px; }
 
-    .hoy {
-      animation: brillar 2s infinite alternate;
-      box-shadow: 0 0 35px 10px rgba(255,214,10,0.6);
-      border-color: #FFD60A;
-    }
-
-    @keyframes brillar {
-      0% { transform: scale(1); filter: brightness(1); }
-      100% { transform: scale(1.05); filter: brightness(1.2); }
+    .etiqueta {
+      color: #FFD60A;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-shadow: 0 0 8px rgba(255,214,10,0.4);
     }
 
     canvas#confetti {
@@ -82,82 +93,129 @@
       width: 100%; height: 100%;
       pointer-events: none; z-index: 0;
     }
+
+    /* Pantalla de carga */
+    .carga {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 1s ease;
+    }
+    .carga img { width: 320px; animation: aparecer 2s ease; }
+    @keyframes aparecer {
+      0% { opacity: 0; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .carga.oculta { opacity: 0; pointer-events: none; }
+
+    .fade-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #fff;
+      opacity: 0;
+      z-index: 999;
+      pointer-events: none;
+      transition: opacity 1.2s ease;
+    }
+    .fade-overlay.activo { opacity: 1; }
   </style>
 </head>
 <body>
+  <div class="fade-overlay" id="fadeOverlay"></div>
+  <div class="carga" id="pantallaCarga">
+    <img src="img/carga.png" alt="Cargando...">
+  </div>
+
+  <canvas id="confetti"></canvas>
   <div class="corner-black"></div>
   <div class="corner-yellow"></div>
-  <img src="img/logo.png" alt="Logo LUM" class="logo">
-  <canvas id="confetti"></canvas>
-
-  <div class="card" id="ultimo">
-    <h2 class="title">🎉 Último Cumpleaños</h2>
-    <p>Cargando...</p>
-  </div>
-
-  <div class="card" id="proximo">
-    <h2 class="title">🎂 Próximo Cumpleaños</h2>
-    <p>Cargando...</p>
-  </div>
+  <img src="img/logo.png" alt="Logo LUM" class="logo" id="logo">
+  <div class="card" id="contenedor"></div>
 
   <script>
     const SHEET_URL =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
-
     const tienda = new URLSearchParams(window.location.search).get("tienda");
+    const cont = document.getElementById("contenedor");
+    const pantallaCarga = document.getElementById("pantallaCarga");
+    const fadeOverlay = document.getElementById("fadeOverlay");
+    const logo = document.getElementById("logo");
 
     const RANGOS = {
-      DS_SIERRA: { inicio: 3, fin: 20, columnas: [0, 1, 2, 3] },
-      DS_CHAPINERO: { inicio: 3, fin: 20, columnas: [5, 6, 7, 8] }
+      DS_CHICO: { inicio: 3, fin: 20, columnas: [0, 1, 2, 3] },
+      DS_SIERRA: { inicio: 3, fin: 20, columnas: [5, 6, 7, 8] }
     };
+
+    let index = 0, lista = [];
 
     async function cargarCumples() {
       try {
         const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
-
         const conf = RANGOS[tienda];
-        if (!conf) return;
+        if (!conf) return siguientePantalla();
 
-        const datos = filas.slice(conf.inicio, conf.fin).map(f => ({
+        lista = filas.slice(conf.inicio, conf.fin).map(f => ({
           nombre: f[conf.columnas[0]]?.trim(),
           mensaje: f[conf.columnas[1]]?.trim(),
           imagen: f[conf.columnas[2]]?.trim(),
           fecha: f[conf.columnas[3]]?.trim()
         })).filter(x => x.nombre && x.fecha);
 
-        if (!datos.length) return;
+        if (!lista.length) return animarSalida("empleado.html");
 
         const hoy = new Date();
-        const convertir = f => new Date(f.replace(/-/g, "/"));
+        const hoyMD = ("0" + (hoy.getMonth()+1)).slice(-2) + "-" + ("0"+hoy.getDate()).slice(-2);
+        const normalizar = f => {
+          const d = new Date(f);
+          return ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0"+d.getDate()).slice(-2);
+        };
 
-        const pasados = datos.filter(d => convertir(d.fecha) < hoy);
-        const futuros = datos.filter(d => convertir(d.fecha) >= hoy);
+        const pasados = lista.filter(l => normalizar(l.fecha) < hoyMD);
+        const futuros = lista.filter(l => normalizar(l.fecha) > hoyMD);
 
-        const ultimo = pasados.sort((a,b)=>convertir(b.fecha)-convertir(a.fecha))[0];
-        const proximo = futuros.sort((a,b)=>convertir(a.fecha)-convertir(b.fecha))[0];
+        const ultimo = pasados.sort((a,b) => new Date(b.fecha) - new Date(a.fecha))[0];
+        const proximo = futuros.sort((a,b) => new Date(a.fecha) - new Date(b.fecha))[0];
 
-        if (ultimo) mostrar("ultimo", ultimo);
-        if (proximo) mostrar("proximo", proximo);
-      } catch (e) {
-        console.error("Error cargando cumpleaños:", e);
+        pantallaCarga.classList.add("oculta");
+        cont.classList.add("visible");
+        mostrarCumple(ultimo, "🎉 Último Cumpleaños");
+        setTimeout(() => {
+          mostrarCumple(proximo, "🎁 Próximo Cumpleaños");
+        }, 10000);
+
+        setTimeout(() => animarSalida("empleado.html"), 20000);
+      } catch {
+        animarSalida("empleado.html");
       }
     }
 
-    function mostrar(id, d) {
-      const el = document.getElementById(id);
-      const hoy = new Date().toISOString().split("T")[0];
-      const esHoy = d.fecha === hoy;
-      el.innerHTML = `
-        <img src="${d.imagen}" class="photo ${esHoy ? "hoy" : ""}" alt="${d.nombre}">
+    function mostrarCumple(d, etiqueta) {
+      if (!d) return;
+      cont.innerHTML = `
+        <div class="etiqueta">${etiqueta}</div>
+        <img src="${d.imagen}" class="photo">
         <div class="nombre">${d.nombre}</div>
-        <div class="mensaje">${d.mensaje}</div>
-        <div class="fecha">${new Date(d.fecha).toLocaleDateString("es-CO", {
-          year: "numeric", month: "long", day: "numeric"
-        })}</div>
-      `;
-      if (esHoy) lanzarConfeti();
+        <div class="mensaje">${d.mensaje}</div>`;
+      lanzarConfeti();
+    }
+
+    function animarSalida(destino) {
+      logo.classList.add("hide");
+      setTimeout(() => {
+        fadeOverlay.classList.add("activo");
+        setTimeout(() => {
+          window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`;
+        }, 1000);
+      }, 1000);
     }
 
     function lanzarConfeti() {
@@ -170,14 +228,14 @@
         y: Math.random() * -canvas.height,
         r: Math.random() * 6 + 2,
         d: Math.random() * 20 + 10,
-        color: `hsl(${Math.random() * 60 + 40},100%,50%)`
+        color: `hsl(${Math.random()*60+40},100%,50%)`
       }));
       (function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0,0,canvas.width,canvas.height);
         for (const o of p) {
           ctx.fillStyle = o.color;
-          ctx.fillRect(o.x, o.y, o.r, o.r);
-          o.y += Math.cos(o.d) + 2;
+          ctx.fillRect(o.x,o.y,o.r,o.r);
+          o.y += Math.cos(o.d)+2;
           o.x += Math.sin(o.d);
           if (o.y > canvas.height) o.y = 0;
         }
