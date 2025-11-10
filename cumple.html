@@ -128,10 +128,9 @@
         const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
-        const header = filas.findIndex(f => f.includes("Nombre del cumpleañero"));
-        if (header === -1) return animarSalida("empleado.html");
 
-        const data = filas.slice(header + 1)
+        // 🔹 Tus datos empiezan en la fila 3, así que saltamos las dos primeras
+        const data = filas.slice(3)
           .map(f => ({
             nombre: f[0]?.trim(),
             mensaje: f[1]?.trim(),
@@ -144,9 +143,8 @@
 
         const hoy = new Date();
         const thisYear = hoy.getFullYear();
-        data.forEach(d => d.proximo = new Date(thisYear, d.fecha.getMonth(), d.fecha.getDate()));
 
-        // si ya pasó este año, moverlo al siguiente
+        data.forEach(d => d.proximo = new Date(thisYear, d.fecha.getMonth(), d.fecha.getDate()));
         data.forEach(d => { if (d.proximo < hoy) d.proximo.setFullYear(thisYear + 1); });
 
         const ultimo = data.filter(d => d.proximo < hoy)
