@@ -115,7 +115,8 @@
   <div class="card" id="contenedor"></div>
 
   <script>
-    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
+    const SHEET_URL =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
     const tienda = new URLSearchParams(window.location.search).get("tienda");
     const cont = document.getElementById("contenedor");
     const pantallaCarga = document.getElementById("pantallaCarga");
@@ -135,23 +136,23 @@
             nombre: f[0]?.trim(),
             mensaje: f[1]?.trim(),
             imagen: f[2]?.trim(),
-            fecha: f[3]?.trim()
+            fecha: new Date(f[3]?.trim())
           }))
-          .filter(x => x.nombre && x.fecha);
+          .filter(x => x.nombre && !isNaN(x.fecha));
 
         if (!data.length) return animarSalida("empleado.html");
 
         const hoy = new Date();
-        const hoyMD = ("0"+(hoy.getMonth()+1)).slice(-2)+"-"+("0"+hoy.getDate()).slice(-2);
-        const normalizar = f => {
-          const d = new Date(f);
-          return ("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);
-        };
+        const thisYear = hoy.getFullYear();
+        data.forEach(d => d.proximo = new Date(thisYear, d.fecha.getMonth(), d.fecha.getDate()));
 
-        const pasados = data.filter(d => normalizar(d.fecha) < hoyMD);
-        const futuros = data.filter(d => normalizar(d.fecha) > hoyMD);
-        const ultimo = pasados.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha))[0];
-        const proximo = futuros.sort((a,b)=>new Date(a.fecha)-new Date(b.fecha))[0];
+        // si ya pasó este año, moverlo al siguiente
+        data.forEach(d => { if (d.proximo < hoy) d.proximo.setFullYear(thisYear + 1); });
+
+        const ultimo = data.filter(d => d.proximo < hoy)
+                           .sort((a,b)=>b.proximo-a.proximo)[0];
+        const proximo = data.sort((a,b)=>a.proximo-b.proximo)
+                            .find(d => d.proximo >= hoy);
 
         pantallaCarga.classList.add("oculta");
         cont.classList.add("visible");
