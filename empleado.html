@@ -112,96 +112,96 @@
   <img src="img/logo.png" alt="Logo LUM" class="logo" id="logo">
   <div class="container" id="contenedor"></div>
 
-  <script>
-    const SHEET_URL =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
-    const tienda = new URLSearchParams(window.location.search).get("tienda");
-    const cont = document.getElementById("contenedor");
-    const pantallaCarga = document.getElementById("pantallaCarga");
-    const fadeOverlay = document.getElementById("fadeOverlay");
-    const logo = document.getElementById("logo");
+<script>
+  const SHEET_URL =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
+  const tienda = new URLSearchParams(window.location.search).get("tienda");
+  const cont = document.getElementById("contenedor");
+  const pantallaCarga = document.getElementById("pantallaCarga");
+  const fadeOverlay = document.getElementById("fadeOverlay");
+  const logo = document.getElementById("logo");
 
-    const RANGOS = {
-      DS_SIERRA: { filaEmpleado: 23, columnas: [0, 1, 2] },
-      DS_CHAPINERO: { filaEmpleado: 23, columnas: [5, 6, 7] }
-    };
+  const RANGOS = {
+    DS_SIERRA: { filaEmpleado: 23, columnas: [0, 1, 2] },
+    DS_CHAPINERO: { filaEmpleado: 23, columnas: [5, 6, 7] }
+  };
 
-    async function cargarEmpleado() {
-      try {
-        const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
-        const text = await res.text();
-        const filas = text.trim().split("\n").map(f => f.split("\t"));
-        const conf = RANGOS[tienda];
-        if (!conf) return saltoRapido();
+  async function cargarEmpleado() {
+    try {
+      const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
+      const text = await res.text();
+      const filas = text.trim().split("\n").map(f => f.split("\t"));
+      const conf = RANGOS[tienda];
+      if (!conf) return saltoRapido();
 
-        const fila = filas[conf.filaEmpleado] || [];
-        const e = {
-          nombre: fila[conf.columnas[0]]?.trim(),
-          mensaje: fila[conf.columnas[1]]?.trim(),
-          imagen: fila[conf.columnas[2]]?.trim()
-        };
+      const fila = filas[conf.filaEmpleado] || [];
+      const nombre = fila[conf.columnas[0]]?.trim();
+      const mensaje = fila[conf.columnas[1]]?.trim();
+      const imagen = fila[conf.columnas[2]]?.trim();
 
-        // Si no hay datos válidos → saltar sin quitar carga
-        if (!e.nombre && !e.mensaje && !e.imagen) {
-          return saltoRapido();
-        }
+      // Si todo está vacío, saltar de una vez
+      if (!nombre && !mensaje && !imagen) return saltoRapido();
 
-        // Si hay datos → mostrar normal
-        pantallaCarga.classList.add("oculta");
-        cont.classList.add("visible");
-        cont.innerHTML = `
-          <h1 class="title">🏆 Empleado del Mes</h1>
-          <img src="${e.imagen}" alt="${e.nombre}" class="photo">
-          <div class="nombre">${e.nombre}</div>
-          <div class="mensaje">${e.mensaje || "Por su excelente desempeño"}</div>`;
-        lanzarConfeti();
+      pantallaCarga.classList.add("oculta");
+      cont.classList.add("visible");
 
-        setTimeout(() => animarSalida("motivacional.html"), 30000);
-      } catch {
-        saltoRapido();
+      // Construir contenido de forma segura
+      let contenido = `<h1 class="title">🏆 Empleado del Mes</h1>`;
+      if (imagen) contenido += `<img src="${imagen}" alt="${nombre || 'Empleado'}" class="photo">`;
+      if (nombre) contenido += `<div class="nombre">${nombre}</div>`;
+      if (mensaje) contenido += `<div class="mensaje">${mensaje}</div>`;
+      if (!mensaje && nombre) contenido += `<div class="mensaje">Por su excelente desempeño</div>`;
+
+      cont.innerHTML = contenido;
+      lanzarConfeti();
+
+      setTimeout(() => animarSalida("motivacional.html"), 30000);
+    } catch {
+      saltoRapido();
+    }
+  }
+
+  function saltoRapido() {
+    fadeOverlay.classList.add("activo");
+    setTimeout(() => {
+      window.location.href = `motivacional.html?tienda=${encodeURIComponent(tienda)}`;
+    }, 800);
+  }
+
+  function animarSalida(destino) {
+    fadeOverlay.classList.add("activo");
+    setTimeout(() => {
+      window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`;
+    }, 1000);
+  }
+
+  function lanzarConfeti() {
+    const canvas = document.getElementById("confetti");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const p = Array.from({ length: 60 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * -canvas.height,
+      r: Math.random() * 6 + 2,
+      d: Math.random() * 20 + 10,
+      color: `hsl(${Math.random() * 60 + 40}, 100%, 50%)`
+    }));
+    (function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const o of p) {
+        ctx.fillStyle = o.color;
+        ctx.fillRect(o.x, o.y, o.r, o.r);
+        o.y += Math.cos(o.d) + 2;
+        o.x += Math.sin(o.d);
+        if (o.y > canvas.height) o.y = 0;
       }
-    }
+      requestAnimationFrame(draw);
+    })();
+  }
 
-    function saltoRapido() {
-      fadeOverlay.classList.add("activo");
-      setTimeout(() => {
-        window.location.href = `motivacional.html?tienda=${encodeURIComponent(tienda)}`;
-      }, 800);
-    }
+  cargarEmpleado();
+</script>
 
-    function animarSalida(destino) {
-      fadeOverlay.classList.add("activo");
-      setTimeout(() => {
-        window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`;
-      }, 1000);
-    }
-
-    function lanzarConfeti() {
-      const canvas = document.getElementById("confetti");
-      const ctx = canvas.getContext("2d");
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      const p = Array.from({ length: 60 }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * -canvas.height,
-        r: Math.random() * 6 + 2,
-        d: Math.random() * 20 + 10,
-        color: `hsl(${Math.random() * 60 + 40}, 100%, 50%)`
-      }));
-      (function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (const o of p) {
-          ctx.fillStyle = o.color;
-          ctx.fillRect(o.x, o.y, o.r, o.r);
-          o.y += Math.cos(o.d) + 2;
-          o.x += Math.sin(o.d);
-          if (o.y > canvas.height) o.y = 0;
-        }
-        requestAnimationFrame(draw);
-      })();
-    }
-
-    cargarEmpleado();
-  </script>
 </body>
 </html>
