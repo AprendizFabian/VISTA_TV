@@ -39,27 +39,15 @@
       width: 100px;
       animation: floatLogo 3s ease-in-out infinite alternate;
       z-index: 5;
+      transition: transform 1s ease, opacity 1s ease;
     }
     @keyframes floatLogo { 0%{transform:translateY(0);}100%{transform:translateY(6px);} }
 
-    /* Animación de salida: mover al centro y luego encoger */
-    .logo.to-center {
+    .logo.hide {
+      transform: scale(0) translate(-50%, -50%);
+      opacity: 0;
       position: fixed;
       top: 50%; left: 50%;
-      transform: translate(-50%, -50%) scale(1);
-      animation: logoCenter 400ms ease forwards;
-      z-index: 5;
-    }
-    @keyframes logoCenter {
-      from { transform: translate(-50%, -50%) scale(1); }
-      to   { transform: translate(-50%, -50%) scale(0.9); }
-    }
-    .logo.shrink {
-      animation: logoShrink 350ms ease forwards;
-    }
-    @keyframes logoShrink {
-      from { transform: translate(-50%, -50%) scale(0.9); opacity: 1; }
-      to   { transform: translate(-50%, -50%) scale(0.6); opacity: 1; }
     }
 
     .container {
@@ -99,16 +87,15 @@
     @keyframes aparecer { 0% { opacity: 0; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
     .carga.oculta { opacity: 0; pointer-events: none; }
 
-    /* Overlay blanco por encima de TODO (cubre logo sí o sí) */
     .fade-overlay {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
       background: #fff;
       opacity: 0;
-      z-index: 10000; /* más alto que todo */
+      z-index: 9999;
       pointer-events: none;
-      transition: opacity 600ms ease;
+      transition: opacity 1s ease;
     }
     .fade-overlay.activo { opacity: 1; }
   </style>
@@ -135,11 +122,9 @@
     const logo = document.getElementById("logo");
 
     const RANGOS = {
-      DS_SIERRA:   { filaEmpleado: 23, columnas: [0, 1, 2] },
-      DS_CHAPINERO:{ filaEmpleado: 23, columnas: [5, 6, 7] }
+      DS_SIERRA: { filaEmpleado: 23, columnas: [0, 1, 2] },
+      DS_CHAPINERO: { filaEmpleado: 23, columnas: [5, 6, 7] }
     };
-
-    let rafId = null; // para apagar confeti
 
     async function cargarEmpleado() {
       try {
@@ -151,57 +136,44 @@
 
         const fila = filas[conf.filaEmpleado] || [];
         const e = {
-          nombre:  fila[conf.columnas[0]]?.trim(),
+          nombre: fila[conf.columnas[0]]?.trim(),
           mensaje: fila[conf.columnas[1]]?.trim(),
-          imagen:  fila[conf.columnas[2]]?.trim()
+          imagen: fila[conf.columnas[2]]?.trim()
         };
 
-        // Sin datos válidos → no mostramos nada, salida inmediata pulida
-        if (!e.nombre && !e.mensaje && !e.imagen) return saltoRapido();
+        // Si no hay datos válidos → saltar sin quitar carga
+        if (!e.nombre && !e.mensaje && !e.imagen) {
+          return saltoRapido();
+        }
 
-        setTimeout(() => {
-          pantallaCarga.classList.add("oculta");
-          cont.classList.add("visible");
-          cont.innerHTML = `
-            <h1 class="title">🏆 Empleado del Mes</h1>
-            <img src="${e.imagen}" alt="${e.nombre}" class="photo">
-            <div class="nombre">${e.nombre}</div>
-            <div class="mensaje">${e.mensaje || "Por su excelente desempeño"}</div>`;
-          lanzarConfeti();
+        // Si hay datos → mostrar normal
+        pantallaCarga.classList.add("oculta");
+        cont.classList.add("visible");
+        cont.innerHTML = `
+          <h1 class="title">🏆 Empleado del Mes</h1>
+          <img src="${e.imagen}" alt="${e.nombre}" class="photo">
+          <div class="nombre">${e.nombre}</div>
+          <div class="mensaje">${e.mensaje || "Por su excelente desempeño"}</div>`;
+        lanzarConfeti();
 
-          setTimeout(() => animarSalida("motivacional.html"), 30000);
-        }, 1200);
+        setTimeout(() => animarSalida("motivacional.html"), 30000);
       } catch {
         saltoRapido();
       }
     }
 
     function saltoRapido() {
-      pantallaCarga.classList.add("oculta");
-      // logo al centro, luego overlay blanco, luego navegación
-      logo.classList.add("to-center");
+      fadeOverlay.classList.add("activo");
       setTimeout(() => {
-        logo.classList.add("shrink");
-        fadeOverlay.classList.add("activo");
-        setTimeout(() => {
-          window.location.href = `motivacional.html?tienda=${encodeURIComponent(tienda)}`;
-        }, 650); // ya blanco, cambiamos
-      }, 420); // tras centrar logo
+        window.location.href = `motivacional.html?tienda=${encodeURIComponent(tienda)}`;
+      }, 800);
     }
 
     function animarSalida(destino) {
-      // detener confeti para evitar flicker
-      if (rafId) cancelAnimationFrame(rafId);
-
-      // logo al centro, luego overlay blanco
-      logo.classList.add("to-center");
+      fadeOverlay.classList.add("activo");
       setTimeout(() => {
-        logo.classList.add("shrink");
-        fadeOverlay.classList.add("activo");
-        setTimeout(() => {
-          window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`;
-        }, 650);
-      }, 420);
+        window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`;
+      }, 1000);
     }
 
     function lanzarConfeti() {
@@ -216,8 +188,7 @@
         d: Math.random() * 20 + 10,
         color: `hsl(${Math.random() * 60 + 40}, 100%, 50%)`
       }));
-
-      function draw() {
+      (function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (const o of p) {
           ctx.fillStyle = o.color;
@@ -226,9 +197,8 @@
           o.x += Math.sin(o.d);
           if (o.y > canvas.height) o.y = 0;
         }
-        rafId = requestAnimationFrame(draw);
-      }
-      draw();
+        requestAnimationFrame(draw);
+      })();
     }
 
     cargarEmpleado();
