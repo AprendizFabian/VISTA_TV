@@ -22,6 +22,7 @@
       width: 0; height: 0;
       border-left: 200px solid #000;
       border-bottom: 180px solid transparent;
+      z-index: 2;
     }
 
     .corner-yellow {
@@ -29,12 +30,28 @@
       width: 0; height: 0;
       border-right: 180px solid #FFD60A;
       border-top: 150px solid transparent;
+      z-index: 1;
     }
 
     .logo {
       position: absolute;
       top: 25px; left: 25px;
       width: 90px;
+      z-index: 3;
+      animation: floatLogo 3s ease-in-out infinite alternate;
+      transition: transform 1s ease, opacity 1s ease;
+    }
+
+    @keyframes floatLogo {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(6px); }
+    }
+
+    .logo.hide {
+      transform: scale(0) translate(-50%, -50%);
+      opacity: 0;
+      position: fixed;
+      top: 50%; left: 50%;
     }
 
     .img {
@@ -44,21 +61,89 @@
       border: 5px solid #FFD60A;
       border-radius: 15px;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      z-index: 3;
+      opacity: 0;
+      transform: scale(0.95);
+      transition: all 1.5s ease;
     }
+
+    .img.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Pantalla de carga */
+    .carga {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 1;
+      transition: opacity 1s ease;
+    }
+    .carga img {
+      width: 350px;
+      max-width: 80%;
+      animation: aparecer 2s ease;
+    }
+    @keyframes aparecer {
+      0% { opacity: 0; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .carga.oculta { opacity: 0; pointer-events: none; }
+
+    /* Fusión blanca entre pantallas */
+    .fade-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #fff;
+      opacity: 0;
+      z-index: 999;
+      pointer-events: none;
+      transition: opacity 1.2s ease;
+    }
+    .fade-overlay.activo { opacity: 1; }
   </style>
 </head>
 <body>
+  <div class="fade-overlay" id="fadeOverlay"></div>
+  <div class="carga" id="pantallaCarga">
+    <img src="img/carga.png" alt="Cargando...">
+  </div>
+
   <div class="corner-black"></div>
   <div class="corner-yellow"></div>
-  <img src="img/logo.png" alt="LUM" class="logo">
-  <img src="img/bolsas.jpeg" alt="Instrucciones de Bolsas" class="img">
+  <img src="img/logo.png" alt="LUM" class="logo" id="logo">
+  <img src="img/bolsas.jpeg" alt="Instrucciones de Bolsas" class="img" id="imagen">
 
   <script>
     const tienda = new URLSearchParams(window.location.search).get("tienda");
-    
-    // ⏱️ Espera 20 segundos y vuelve al cumple
+    const fadeOverlay = document.getElementById("fadeOverlay");
+    const pantallaCarga = document.getElementById("pantallaCarga");
+    const logo = document.getElementById("logo");
+    const imagen = document.getElementById("imagen");
+
+    // Mostrar imagen con animación tras la carga
     setTimeout(() => {
-      window.location.href = `cumple.html?tienda=${encodeURIComponent(tienda)}`;
+      pantallaCarga.classList.add("oculta");
+      imagen.classList.add("visible");
+    }, 2000);
+
+    // Salida con transición blanca y logo encogiéndose
+    setTimeout(() => {
+      logo.classList.add("hide");
+      setTimeout(() => {
+        fadeOverlay.classList.add("activo");
+        setTimeout(() => {
+          window.location.href = `cumple.html?tienda=${encodeURIComponent(tienda)}`;
+        }, 1200);
+      }, 1000);
     }, 20000);
   </script>
 </body>

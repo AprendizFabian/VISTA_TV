@@ -132,7 +132,7 @@
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
         const conf = RANGOS[tienda];
-        if (!conf) return soloLogo();
+        if (!conf) return saltoRapido();
 
         const fila = filas[conf.filaEmpleado] || [];
         const e = {
@@ -141,14 +141,13 @@
           imagen: fila[conf.columnas[2]]?.trim()
         };
 
+        // Si no hay datos válidos
+        if (!e.nombre && !e.mensaje && !e.imagen) {
+          return saltoRapido();
+        }
+
         setTimeout(() => {
           pantallaCarga.classList.add("oculta");
-
-          if (!e.nombre && !e.mensaje && !e.imagen) {
-            soloLogo();
-            return;
-          }
-
           cont.classList.add("visible");
           cont.innerHTML = `
             <h1 class="title">🏆 Empleado del Mes</h1>
@@ -160,14 +159,14 @@
           setTimeout(() => animarSalida("motivacional.html"), 30000);
         }, 2000);
       } catch {
-        soloLogo();
+        saltoRapido();
       }
     }
 
-    function soloLogo() {
+    function saltoRapido() {
+      // Oculta carga y hace transición sin mostrar nada
       pantallaCarga.classList.add("oculta");
-      cont.innerHTML = ""; // sin texto ni imagen
-      setTimeout(() => animarSalida("motivacional.html"), 5000);
+      setTimeout(() => animarSalida("motivacional.html"), 500);
     }
 
     function animarSalida(destino) {
@@ -177,7 +176,7 @@
         setTimeout(() => {
           window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`;
         }, 1000);
-      }, 1000);
+      }, 800);
     }
 
     function lanzarConfeti() {
