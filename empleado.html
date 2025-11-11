@@ -119,7 +119,6 @@
   const cont = document.getElementById("contenedor");
   const pantallaCarga = document.getElementById("pantallaCarga");
   const fadeOverlay = document.getElementById("fadeOverlay");
-  const logo = document.getElementById("logo");
 
   const RANGOS = {
     DS_SIERRA: { filaEmpleado: 23, columnas: [0, 1, 2] },
@@ -135,32 +134,35 @@
       if (!conf) return saltoRapido();
 
       const fila = filas[conf.filaEmpleado] || [];
-      const nombre = fila[conf.columnas[0]]?.trim();
-      const mensaje = fila[conf.columnas[1]]?.trim();
-      const imagen = fila[conf.columnas[2]]?.trim();
+      const nombre = (fila[conf.columnas[0]] || "").trim();
+      const mensaje = (fila[conf.columnas[1]] || "").trim();
+      const imagen = (fila[conf.columnas[2]] || "").trim();
 
-      // Si todo está vacío, saltar de una vez
-      if (!nombre && !mensaje && !imagen) return saltoRapido();
+      // Si todas las celdas están vacías o son undefined → salir de una vez
+      if (![nombre, mensaje, imagen].some(v => v && v.length > 0)) {
+        return saltoRapido();
+      }
 
+      // Mostrar si hay datos válidos
       pantallaCarga.classList.add("oculta");
       cont.classList.add("visible");
-
-      // Construir contenido de forma segura
-      let contenido = `<h1 class="title">🏆 Empleado del Mes</h1>`;
-      if (imagen) contenido += `<img src="${imagen}" alt="${nombre || 'Empleado'}" class="photo">`;
-      if (nombre) contenido += `<div class="nombre">${nombre}</div>`;
-      if (mensaje) contenido += `<div class="mensaje">${mensaje}</div>`;
-      if (!mensaje && nombre) contenido += `<div class="mensaje">Por su excelente desempeño</div>`;
-
-      cont.innerHTML = contenido;
+      cont.innerHTML = `
+        <h1 class="title">🏆 Empleado del Mes</h1>
+        ${imagen ? `<img src="${imagen}" alt="${nombre}" class="photo">` : ""}
+        ${nombre ? `<div class="nombre">${nombre}</div>` : ""}
+        <div class="mensaje">${mensaje || "Por su excelente desempeño"}</div>`;
       lanzarConfeti();
 
+      // Luego de 30s pasa
       setTimeout(() => animarSalida("motivacional.html"), 30000);
-    } catch {
+
+    } catch (e) {
+      console.error("Error al cargar datos:", e);
       saltoRapido();
     }
   }
 
+  // 🔁 Si no hay datos, o falla el fetch → animación de salida inmediata
   function saltoRapido() {
     fadeOverlay.classList.add("activo");
     setTimeout(() => {
@@ -202,6 +204,5 @@
 
   cargarEmpleado();
 </script>
-
 </body>
 </html>
