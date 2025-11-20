@@ -378,7 +378,7 @@ body{
       <div>Período</div>
       <div># Órdenes</div>
       <div>% Defect Rate</div>
-      <div>Prom Instore</div>
+      <div> In Store</div>
     </div>
 
     <div id="tabla-rows"></div>
@@ -537,7 +537,7 @@ const semanas = rowsAct.map((r,i)=>({
 
       html += `
       <div class="row" style="border-bottom: 3px solid #FFD60A; background: rgba(255, 214, 10, 0.08); border-radius: 12px; padding-left: 8px; padding-right: 8px;">
-        <div class="label" style="font-size: 18px;">🏆 TOTAL MES</div>
+        <div class="label" style="font-size: 18px;">🏆 ACUMULADO MES</div>
         <div class="cell" style="font-size: 18px;">${totO.toLocaleString("es-CO")}</div>
         <div class="cell ${classForMeta(avgD, metas.defect)}" style="font-size: 17px;">${avgD.toFixed(2)}%</div>
         <div class="cell ${classForMeta(avgI, metas.instore)}" style="font-size: 17px;">${avgI.toFixed(2)}m</div>
