@@ -54,6 +54,21 @@
       top: 50%; left: 50%;
     }
 
+    .img-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3;
+      opacity: 0;
+      transition: opacity 1.5s ease;
+    }
+
+    .img-container.visible {
+      opacity: 1;
+    }
+
     .img {
       max-width: 95%;
       max-height: 95vh;
@@ -61,15 +76,25 @@
       border: 5px solid #FFD60A;
       border-radius: 15px;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
-      z-index: 3;
-      opacity: 0;
-      transform: scale(0.95);
-      transition: all 1.5s ease;
+      transform-origin: center center;
+      transition: transform 2s ease-in-out;
     }
 
-    .img.visible {
-      opacity: 1;
-      transform: scale(1);
+    /* Animación de zoom secuencial */
+    .img.zoom-section-1 {
+      transform: scale(2.3) translate(0%, -30%);
+    }
+
+    .img.zoom-section-2 {
+      transform: scale(2.2) translate(0%, -10%);
+    }
+
+    .img.zoom-section-3 {
+      transform: scale(2.3) translate(0%, 20%);
+    }
+
+    .img.zoom-out {
+      transform: scale(1) translate(0%, 0%);
     }
 
     /* Pantalla de carga */
@@ -120,7 +145,10 @@
   <div class="corner-black"></div>
   <div class="corner-yellow"></div>
   <img src="img/logo.png" alt="LUM" class="logo" id="logo">
-  <img src="img/bolsas.jpeg" alt="Instrucciones de Bolsas" class="img" id="imagen">
+  
+  <div class="img-container" id="imgContainer">
+    <img src="img/bolsas.jpeg" alt="Instrucciones de Bolsas" class="img" id="imagen">
+  </div>
 
   <script>
     const tienda = new URLSearchParams(window.location.search).get("tienda");
@@ -128,12 +156,50 @@
     const pantallaCarga = document.getElementById("pantallaCarga");
     const logo = document.getElementById("logo");
     const imagen = document.getElementById("imagen");
+    const imgContainer = document.getElementById("imgContainer");
 
     // Mostrar imagen con animación tras la carga
     setTimeout(() => {
       pantallaCarga.classList.add("oculta");
-      imagen.classList.add("visible");
+      imgContainer.classList.add("visible");
+      iniciarZoomSecuencial();
     }, 2000);
+
+    function iniciarZoomSecuencial() {
+      // Vista completa inicial (2 segundos)
+      setTimeout(() => {
+        // Zoom a sección 1 (bolsas de maíz) - 4 segundos
+        imagen.classList.add('zoom-section-1');
+        
+        setTimeout(() => {
+          // Zoom out y luego zoom a sección 2 (uso consciente) - 4 segundos
+          imagen.classList.remove('zoom-section-1');
+          imagen.classList.add('zoom-out');
+          
+          setTimeout(() => {
+            imagen.classList.remove('zoom-out');
+            imagen.classList.add('zoom-section-2');
+            
+            setTimeout(() => {
+              // Zoom out y luego zoom a sección 3 (contaminación) - 4 segundos
+              imagen.classList.remove('zoom-section-2');
+              imagen.classList.add('zoom-out');
+              
+              setTimeout(() => {
+                imagen.classList.remove('zoom-out');
+                imagen.classList.add('zoom-section-3');
+                
+                setTimeout(() => {
+                  // Zoom out final
+                  imagen.classList.remove('zoom-section-3');
+                  imagen.classList.add('zoom-out');
+                }, 4000);
+              }, 500);
+            }, 4000);
+          }, 500);
+        }, 4000);
+      }, 2000);
+    }
 
     // Salida con transición blanca y logo encogiéndose
     setTimeout(() => {
@@ -141,10 +207,10 @@
       setTimeout(() => {
         fadeOverlay.classList.add("activo");
         setTimeout(() => {
-          window.location.href = `cumple.html?tienda=${encodeURIComponent(tienda)}`;
+          window.location.href = `mejores.html?tienda=${encodeURIComponent(tienda)}`;
         }, 1200);
       }, 1000);
-    }, 20000);
+    }, 80000);
   </script>
 </body>
 </html>
