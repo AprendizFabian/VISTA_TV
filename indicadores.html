@@ -9,8 +9,9 @@
 
 <style>
 :root{
-  --lum-yellow:#FFD60A;
-  --lum-black:#414242;
+  --lum-green-dark:#0b3113;
+  --lum-green:#14532d;
+  --lum-green-soft:#f2fff5;
 
   --ok-bg:#10b981;
   --ok-text:#ffffff;
@@ -22,51 +23,48 @@
   --bad-text:#ffffff;
 }
 
+/* RESET */
 *{margin:0;padding:0;box-sizing:border-box;}
 
 body{
-  background: #ffffff;
-  font-family:"Poppins", sans-serif;
+  background:#ffffff;
+  font-family:"Poppins",sans-serif;
   height:100vh;
   overflow:hidden;
   display:flex;
   justify-content:center;
   align-items:center;
   position:relative;
-  padding: 20px;
 }
 
-/* ESQUINAS DECORATIVAS */
+/* ESQUINAS */
 .corner-black{
   position:absolute;top:0;left:0;
-  width: 0;
-  height: 0;
-  border-left:280px solid #414242;
-  border-bottom:200px solid transparent;
-  z-index: 1;
+  width:0;height:0;
+  border-left:260px solid #000;
+  border-bottom:190px solid transparent;
+  z-index:1;
 }
 .corner-yellow{
   position:absolute;bottom:0;right:0;
-  width: 0;
-  height: 0;
-  border-right:240px solid #FFD60A;
-  border-top:210px solid transparent;
-  z-index: 1;
+  width:0;height:0;
+  border-right:220px solid #FFD60A;
+  border-top:180px solid transparent;
+  z-index:1;
 }
 
 /* LOGO */
 .logo{
   position:absolute;
-  top:30px;left:30px;
-  width:100px;
+  top:22px;left:22px;
+  width:95px;
   z-index:50;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
   animation:floatLogo 3s ease-in-out infinite alternate;
   transition:1s ease;
 }
 @keyframes floatLogo{
-  0%{transform:translateY(0) rotate(0deg);}
-  100%{transform:translateY(8px) rotate(2deg);}
+  0%{transform:translateY(0);}
+  100%{transform:translateY(7px);}
 }
 .logo.hide{
   transform:scale(0) translate(-50%,-50%);
@@ -75,268 +73,174 @@ body{
   top:50%;left:50%;
 }
 
-/* CARGA */
+/* PANTALLA CARGA */
 .carga{
   position:fixed;
   inset:0;
-  background: #ffffff;
+  background:white;
   display:flex;
   justify-content:center;
   align-items:center;
   z-index:999;
-  transition:1s;
+  transition:opacity 1s;
 }
 .carga img{
-  width:320px;
-  animation:aparecer 2s ease;
-  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));
+  width:350px;
+  animation:fadeIn 2s ease;
 }
-@keyframes aparecer{
-  0%{opacity:0;transform:scale(.9) rotate(-5deg);}
-  50%{opacity:1;transform:scale(1.08) rotate(2deg);}
-  100%{opacity:1;transform:scale(1) rotate(0deg);}
+@keyframes fadeIn{
+  0%{opacity:0;transform:scale(.93);}
+  100%{opacity:1;transform:scale(1);}
 }
 .carga.oculta{
   opacity:0;
   pointer-events:none;
 }
 
-/* FADE */
+/* FADE DE SALIDA */
 .fade-overlay{
   position:fixed;
   inset:0;
   background:white;
   opacity:0;
-  transition:1s;
+  transition:opacity 1s;
   z-index:900;
 }
 .fade-overlay.activo{
   opacity:1;
 }
 
-/* CONTENIDO */
+/* CONTENEDOR PRINCIPAL */
 .content{
   opacity:0;
-  transform:translateY(30px) scale(0.98);
-  transition:1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform:translateY(20px);
+  transition:1s;
   width:100%;
   max-width:1500px;
-  z-index: 10;
+  z-index:10;
 }
 .content.visible{
   opacity:1;
-  transform:translateY(0) scale(1);
+  transform:translateY(0);
 }
 
-/* HEADER */
-.header-bar{
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  color:white;
-  padding:20px 28px;
-  border-radius:20px 20px 0 0;
+/* HOJA */
+.sheet{
+  border:4px solid var(--lum-green-dark);
+  border-radius:8px;
+  overflow:hidden;
+  background:#ffffff;
+  box-shadow:0 10px 40px rgba(0,0,0,.25);
+}
+
+/* CINTA SUPERIOR */
+.sheet-top{
+  background:var(--lum-green-dark);
+  color:#fff;
+  padding:12px 22px;
+  font-size:15px;
   display:flex;
   justify-content:space-between;
-  align-items: center;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  position: relative;
-  overflow: hidden;
+  align-items:center;
 }
-
-.header-bar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--lum-yellow), #fbbf24, var(--lum-yellow));
-  animation: shimmer 3s linear infinite;
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-.title{
+.sheet-title{
   font-size:38px;
   font-weight:800;
-  letter-spacing: -1px;
-  background: linear-gradient(135deg, #FFD60A, #fbbf24);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 2px 8px rgba(255, 214, 10, 0.3);
+  letter-spacing:1px;
 }
-
-.subtitle {
-  font-size:18px;
-  font-weight:600;
-  color: #94a3b8;
-  margin-top: 4px;
+.sheet-field{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  margin-left:25px;
 }
-
-.header-right span{
-  display:block;
-  font-size:14px;
-  font-weight: 600;
-  text-align:right;
-  color: #cbd5e1;
-  margin-bottom: 4px;
-}
-
-.header-right span:last-child {
-  margin-bottom: 0;
-}
-
-/* TABLA */
-.board{
-  background: #ffffff;
-  padding:22px 28px;
-  border-radius:0 0 20px 20px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.3);
-}
-
-/* METAS */
-.row-meta{
-  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-  padding:12px 14px;
-  border-radius:12px;
+.sheet-field-label{
   font-weight:700;
-  display:grid;
-  grid-template-columns:1.6fr 1fr 1fr 1fr;
-  margin-bottom:14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  border: 2px solid rgba(255, 214, 10, 0.3);
-  gap: 8px;
-  font-size: 14px;
-  color: #1e293b;
+  text-transform:uppercase;
+}
+.sheet-field-box{
+  background:#f2fff5;
+  color:#111;
+  padding:3px 12px;
+  border-radius:2px;
+  font-weight:600;
+  min-width:170px;
+  text-align:center;
+  font-size:17px;
 }
 
-.row-meta > div {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* TABLA PRINCIPAL */
+.sheet-main{
+  background:#f7fff8;
+  padding:10px 12px 14px;
 }
 
-.row-meta > div:first-child {
-  justify-content: flex-start;
-  font-size: 15px;
-  letter-spacing: 0.5px;
+.table-indicadores{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  font-size:18px;
 }
 
-/* ENCABEZADOS */
-.head-row{
-  display:grid;
-  grid-template-columns:1.6fr 1fr 1fr 1fr;
-  border-bottom:3px solid #e2e8f0;
-  padding-bottom:10px;
-  margin-bottom:10px;
-  gap: 8px;
-  font-weight: 700;
-  font-size: 13px;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.table-indicadores th,
+.table-indicadores td{
+  border:1px solid #d4ead4;
+  padding:10px 8px;
 }
 
-.head-row > div {
-  text-align: center;
+/* HEAD */
+.table-indicadores thead th{
+  background:#dfeee0;
+  color:#1f2933;
+  font-weight:800;
+  text-align:center;
+  font-size:18px;
 }
 
-.head-row > div:first-child {
-  text-align: left;
+/* COLUMNA IZQUIERDA */
+.row-label{
+  background:var(--lum-green);
+  color:#ffffff;
+  font-weight:700;
+  text-align:left;
+  font-size:20px;
+  padding-left:10px;
+  width:170px;
 }
 
 /* FILAS */
-.row{
-  display:grid;
-  grid-template-columns:1.6fr 1fr 1fr 1fr;
-  padding:10px 0;
-  border-bottom:1px solid #e2e8f0;
-  opacity:0;
-  transform:translateX(-30px);
-  animation:slideIn .6s forwards;
-  gap: 8px;
-  transition: all 0.3s ease;
+.table-indicadores tbody tr:nth-child(odd){
+  background:#f4fff7;
+}
+.table-indicadores tbody tr:nth-child(even){
+  background:#e9f7eb;
 }
 
-.row:hover {
-  background: rgba(255, 214, 10, 0.05);
-  transform: translateX(0) scale(1.01);
-  border-radius: 12px;
-  padding-left: 8px;
-  padding-right: 8px;
+.tr-meta{
+  background:#dff7e2 !important;
+}
+.tr-meta .row-label{
+  background:#124d2b;
 }
 
-@keyframes slideIn{
-  to{opacity:1;transform:translateX(0);}
-}
-
-.row:nth-child(1) { animation-delay: 0.1s; }
-.row:nth-child(2) { animation-delay: 0.2s; }
-.row:nth-child(3) { animation-delay: 0.3s; }
-.row:nth-child(4) { animation-delay: 0.4s; }
-.row:nth-child(5) { animation-delay: 0.5s; }
-
-/* COLORES META */
-.cell-ok{
-  background: var(--ok-bg);
-  color: var(--ok-text);
-  padding:6px 12px;
-  border-radius:10px;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-  display: inline-block;
-}
-.cell-warn{
-  background: var(--warn-bg);
-  color: var(--warn-text);
-  padding:6px 12px;
-  border-radius:10px;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
-  display: inline-block;
-}
-.cell-bad{
-  background: var(--bad-bg);
-  color: var(--bad-text);
-  padding:6px 12px;
-  border-radius:10px;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-  display: inline-block;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
-.label{
-  font-weight:700;
-  font-size:17px;
-  color:#1e293b;
-  display: flex;
-  align-items: center;
-}
-
+/* COLORES */
 .cell{
-  font-size:17px;
   font-weight:700;
   text-align:center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #334155;
+  font-size:19px;
 }
-
-/* Efecto brillo en números */
-.cell:not([class*="cell-"]) {
-  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+.cell-ok{
+  background:var(--ok-bg);
+  color:var(--ok-text);
 }
-
+.cell-warn{
+  background:var(--warn-bg);
+  color:var(--warn-text);
+}
+.cell-bad{
+  background:var(--bad-bg);
+  color:var(--bad-text);
+}
 </style>
 </head>
 
@@ -346,240 +250,177 @@ body{
 <div class="corner-yellow"></div>
 
 <div class="carga" id="pantallaCarga">
-  <img src="img/carga.png" alt="Cargando...">
+  <img src="img/carga.png">
 </div>
 <div class="fade-overlay" id="fadeOverlay"></div>
 
-<img src="" class="logo" id="logo" alt="LUM Logo">
 
 <div class="content" id="mainContent">
 
-  <div class="header-bar">
-    <div>
-      <div class="title">INDICADORES</div>
-      <div class="subtitle">Rappi Turbo</div>
-    </div>
-    <div class="header-right" id="infoHeader">
-      <span>DARKSTORE: —</span>
-      <span>MES: —</span>
-    </div>
-  </div>
+  <div class="sheet">
 
-  <div class="board">
-
-    <div class="row-meta">
-      <div>🎯 METAS</div>
-      <div id="metaOrdenes">—</div>
-      <div id="metaDefect">—</div>
-      <div id="metaInstore">—</div>
+    <div class="sheet-top">
+      <div class="sheet-title">INDICADORES</div>
+      <div style="display:flex;">
+        <div class="sheet-field">
+          <span class="sheet-field-label">DARKSTORE:</span>
+          <span class="sheet-field-box" id="campoDarkstore">—</span>
+        </div>
+        <div class="sheet-field">
+          <span class="sheet-field-label">MES:</span>
+          <span class="sheet-field-box" id="campoMes">—</span>
+        </div>
+      </div>
     </div>
 
-    <div class="head-row">
-      <div>Período</div>
-      <div># Órdenes</div>
-      <div>% Defect Rate</div>
-      <div> In Store</div>
+    <div class="sheet-main">
+      <table class="table-indicadores">
+        <thead>
+          <tr>
+            <th class="row-label"></th>
+            <th># ÓRDENES</th>
+            <th>% DEFECT RATE</th>
+            <th>IN STORE</th>
+          </tr>
+        </thead>
+        <tbody id="tablaBody"></tbody>
+      </table>
     </div>
-
-    <div id="tabla-rows"></div>
 
   </div>
 
 </div>
 
-
 <script>
 
-console.log("DEBUG ▶ Inicializando dashboard...");
-
-const tienda = new URLSearchParams(window.location.search).get("tienda");
-
 const API_MES_PASADO = "https://proxy-eight-taupe-93.vercel.app/api/mesPasado.js";
-const API_MES_ACTUAL = "https://proxy-eight-taupe-93.vercel.app/api/mesActual.js";
+const API_MES_ACTUAL  = "https://proxy-eight-taupe-93.vercel.app/api/mesActual.js";
+const SHEET =
+ "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=1247726367&single=true&output=tsv";
 
-// TU TSV DEFINITIVO (gid correcto)
-const SHEET_METAS_TSV =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=1247726367&single=true&output=tsv";
+const tiendaURL = new URLSearchParams(location.search).get("tienda") || "";
 
-// Duración en pantalla
-const DURACION_VISTA_MS = 15000;
+const DURACION = 15000;
 
-const num = v => v == null || v === "" ? 0 : Number(v);
+const num = v => v==null||v==="" ? null : Number(v);
 
-function classForMeta(valor, meta){
-  if(meta == null) return "";
-  if(valor <= meta) return "cell-ok";
-  if(valor <= meta * 1.2) return "cell-warn";
-  return "cell-bad";
+function parseMeta(v){
+  if(!v) return null;
+  return Number(v.replace(",","."));
 }
 
-// SOLO lee D2 y D3 (fila 1 y 2 después del header)
-function obtenerMetasDesdeTSV(tsv){
-  console.log("DEBUG ▶ Analizando TSV...");
-
-  const filas = tsv.trim().split("\n").map(f=>f.split("\t"));
-  console.log("DEBUG ▶ Total filas TSV:", filas.length);
-
-  // Fila 2 → fila[1]
-  // Fila 3 → fila[2]
-  const fila2 = filas[1] || [];
-  const fila3 = filas[2] || [];
-
-  console.log("DEBUG ▶ Fila2:", fila2);
-  console.log("DEBUG ▶ Fila3:", fila3);
-
-  const defect = parseMeta(fila2[3]);   // D2
-  const instore = parseMeta(fila2[4]);  // D3 (está en columna D también)
-
-  console.log("DEBUG ▶ Metas detectadas:", { defect, instore });
-
+function getMetas(tsv){
+  const rows = tsv.trim().split("\n").map(r=>r.split("\t"));
+  const f = rows[1];
   return {
-    ordenes: null,
-    defect,
-    instore
+    ordenes:null,
+    defect : parseMeta(f[3]),
+    instore: parseMeta(f[4])
   };
 }
 
-function parseMeta(raw){
-  if(!raw) return null;
-  raw = raw.replace(",",".");
-
-  const m = raw.match(/[\d.]+/);
-  return m ? parseFloat(m[0]) : null;
+function metaClass(v,m){
+  if(v==null || m==null) return "";
+  if(v<=m) return "cell-ok";
+  if(v<=m*1.2) return "cell-warn";
+  return "cell-bad";
 }
 
 async function cargarIndicadores(){
-  console.log("DEBUG ▶ Descargando APIs & TSV...");
+  const [p,a,m] = await Promise.all([
+    fetch(API_MES_PASADO).then(r=>r.json()),
+    fetch(API_MES_ACTUAL).then(r=>r.json()),
+    fetch(SHEET).then(r=>r.text())
+  ]);
 
-  try{
-    const [p,a,m] = await Promise.all([
-      fetch(API_MES_PASADO),
-      fetch(API_MES_ACTUAL),
-      fetch(SHEET_METAS_TSV)
-    ]);
+  const metas = getMetas(m);
 
-    console.log("DEBUG ▶ APIs descargadas.");
+  const rP = p?.query_result?.data?.rows?.[0];
+  const pasado = rP ? {
+    tienda:rP.Tienda,
+    ordenes:num(rP.Ordenes),
+    defect:num(rP.DefectRate),
+    instore:num(rP.InStoreTime)
+  }:null;
 
-    const mesPasado = await p.json();
-    const mesActual = await a.json();
-    const metasTXT  = await m.text();
+  const semanas = (a?.query_result?.data?.rows || []).map((x,i)=>({
+    etiqueta:`SEMANA ${i+1}`,
+    ordenes:num(x.Ordenes),
+    defect:num(x.DefectRate),
+    instore:num(x.InStoreTime)
+  }));
 
-    console.log("DEBUG ▶ TSV de metas recibido. Longitud:", metasTXT.length);
+  document.getElementById("campoDarkstore").textContent =
+    tiendaURL || pasado?.tienda || semanas[0]?.tienda || "—";
 
-    const metas = obtenerMetasDesdeTSV(metasTXT);
+  document.getElementById("campoMes").textContent =
+    new Date().toLocaleString("es-CO",{month:"long"}).toUpperCase();
 
-    // MES PASADO
-    const rP = mesPasado?.query_result?.data?.rows?.[0];
-    const mesPas = rP ? {
-      tienda:rP.Tienda,
-      ordenes:num(rP.Ordenes),
-      defect:num(rP.DefectRate),
-      instore:num(rP.InStoreTime)
-    } : null;
+  let html="";
 
-    console.log("DEBUG ▶ Mes pasado:", mesPas);
+  html+=`
+    <tr class="tr-meta">
+      <th class="row-label">METAS DEL MES</th>
+      <td class="cell">—</td>
+      <td class="cell">${metas.defect!=null? metas.defect+"%":"—"}</td>
+      <td class="cell">${metas.instore!=null? metas.instore+"m":"—"}</td>
+    </tr>
+  `;
 
-    // MES ACTUAL
-    const rowsAct = mesActual?.query_result?.data?.rows || [];
-    console.log("DEBUG ▶ Semanas encontradas:", rowsAct.length);
-
-const semanas = rowsAct.map((r,i)=>({
-  etiqueta:`SEMANA ${i+1}`,   // ← AHORA SÍ
-  ordenes:num(r.Ordenes),
-  defect:num(r.DefectRate),
-  instore:num(r.InStoreTime),
-  tienda:r.Tienda
-}));
-
-
-    console.log("DEBUG ▶ Semanas parseadas.");
-
-    // HEADER
-    const tiendaH = mesPas?.tienda || semanas[0]?.tienda || "—";
-    const mesNombre = new Date().toLocaleString("es-CO",{month:"long"}).toUpperCase();
-    document.getElementById("infoHeader").innerHTML =
-      `<span>🏪 DARKSTORE: ${tiendaH}</span><span>📅 MES: ${mesNombre}</span>`;
-
-    // METAS
-    document.getElementById("metaDefect").textContent =
-      metas.defect ? `≤ ${metas.defect}%` : "—";
-
-    document.getElementById("metaInstore").textContent =
-      metas.instore ? `≤ ${metas.instore}m` : "—";
-
-    let html = "";
-
-    // MES PASADO
-    if(mesPas){
-      html += `
-      <div class="row">
-        <div class="label">📊 MES PASADO</div>
-        <div class="cell">${mesPas.ordenes.toLocaleString("es-CO")}</div>
-        <div class="cell ${classForMeta(mesPas.defect, metas.defect)}">${mesPas.defect}%</div>
-        <div class="cell ${classForMeta(mesPas.instore, metas.instore)}">${mesPas.instore}m</div>
-      </div>`;
-    }
-
-    semanas.forEach((s, idx)=>{
-      html += `
-      <div class="row">
-        <div class="label">📈 ${s.etiqueta}</div>
-        <div class="cell">${s.ordenes.toLocaleString("es-CO")}</div>
-        <div class="cell ${classForMeta(s.defect, metas.defect)}">${s.defect}%</div>
-        <div class="cell ${classForMeta(s.instore, metas.instore)}">${s.instore}m</div>
-      </div>`;
-    });
-
-    if(semanas.length){
-      const totO = semanas.reduce((a,b)=>a+b.ordenes,0);
-      const avgD = semanas.reduce((a,b)=>a+b.defect,0)/semanas.length;
-      const avgI = semanas.reduce((a,b)=>a+b.instore,0)/semanas.length;
-
-      html += `
-      <div class="row" style="border-bottom: 3px solid #FFD60A; background: rgba(255, 214, 10, 0.08); border-radius: 12px; padding-left: 8px; padding-right: 8px;">
-        <div class="label" style="font-size: 18px;">🏆 ACUMULADO MES</div>
-        <div class="cell" style="font-size: 18px;">${totO.toLocaleString("es-CO")}</div>
-        <div class="cell ${classForMeta(avgD, metas.defect)}" style="font-size: 17px;">${avgD.toFixed(2)}%</div>
-        <div class="cell ${classForMeta(avgI, metas.instore)}" style="font-size: 17px;">${avgI.toFixed(2)}m</div>
-      </div>`;
-    }
-
-    document.getElementById("tabla-rows").innerHTML = html;
-
-    console.log("DEBUG ▶ Tabla renderizada correctamente.");
-
-  }catch(err){
-    console.error("ERROR GENERAL ▶", err);
+  if(pasado){
+    html+=`
+      <tr>
+        <th class="row-label">MES PASADO</th>
+        <td class="cell">${pasado.ordenes?.toLocaleString("es-CO") ?? "—"}</td>
+        <td class="cell ${metaClass(pasado.defect,metas.defect)}">${pasado.defect ?? "—"}%</td>
+        <td class="cell ${metaClass(pasado.instore,metas.instore)}">${pasado.instore ?? "—"}m</td>
+      </tr>
+    `;
   }
+
+  semanas.forEach(s=>{
+    html+=`
+      <tr>
+        <th class="row-label">${s.etiqueta}</th>
+        <td class="cell">${s.ordenes?.toLocaleString("es-CO") ?? "—"}</td>
+        <td class="cell ${metaClass(s.defect,metas.defect)}">${s.defect ?? "—"}%</td>
+        <td class="cell ${metaClass(s.instore,metas.instore)}">${s.instore ?? "—"}m</td>
+      </tr>
+    `;
+  });
+
+  if(semanas.length){
+    const tot = semanas.reduce((a,b)=>a+(b.ordenes||0),0);
+    const avgD = semanas.reduce((a,b)=>a+(b.defect||0),0)/semanas.length;
+    const avgI = semanas.reduce((a,b)=>a+(b.instore||0),0)/semanas.length;
+
+    html+=`
+      <tr>
+        <th class="row-label">TOTAL MES</th>
+        <td class="cell">${tot.toLocaleString("es-CO")}</td>
+        <td class="cell ${metaClass(avgD,metas.defect)}">${avgD.toFixed(2)}%</td>
+        <td class="cell ${metaClass(avgI,metas.instore)}">${avgI.toFixed(2)}m</td>
+      </tr>
+    `;
+  }
+
+  document.getElementById("tablaBody").innerHTML = html;
 }
 
-// Animación salida
 function animarSalida(){
   document.getElementById("logo").classList.add("hide");
+  document.getElementById("fadeOverlay").classList.add("activo");
   setTimeout(()=>{
-    document.getElementById("fadeOverlay").classList.add("activo");
-    setTimeout(()=> window.location.href="motivacional.html",1000);
+    location.href=`cumple.html?tienda=${encodeURIComponent(tiendaURL)}`;
   },1000);
 }
 
-// Inicio
-window.addEventListener("load",()=>{
-  setTimeout(()=>document.getElementById("pantallaCarga").classList.add("oculta"),1200);
-  setTimeout(()=>document.getElementById("mainContent").classList.add("visible"),1500);
-
-  cargarIndicadores();
-
-  setTimeout(animarSalida, DURACION_VISTA_MS);
+window.addEventListener("load", async ()=>{
+  await cargarIndicadores();
+  document.getElementById("pantallaCarga").classList.add("oculta");
+  document.getElementById("mainContent").classList.add("visible");
+  setTimeout(animarSalida,DURACION);
 });
-function animarSalida(){
-  document.getElementById("logo").classList.add("hide");
-  setTimeout(()=>{
-    document.getElementById("fadeOverlay").classList.add("activo");
-    setTimeout(()=>{
-      window.location.href=`cumple.html?tienda=${encodeURIComponent(tienda)}`;
-    },1000);
-  },1000);
-}
 
 </script>
 

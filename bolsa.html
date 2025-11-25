@@ -82,7 +82,7 @@
 
     /* Animación de zoom secuencial */
     .img.zoom-section-1 {
-      transform: scale(2.3) translate(0%, -30%);
+      transform: scale(2.3) translate(0%, 30%);
     }
 
     .img.zoom-section-2 {
@@ -90,7 +90,7 @@
     }
 
     .img.zoom-section-3 {
-      transform: scale(2.3) translate(0%, 20%);
+      transform: scale(2.3) translate(0%, -20%);
     }
 
     .img.zoom-out {
@@ -193,11 +193,11 @@
                   // Zoom out final
                   imagen.classList.remove('zoom-section-3');
                   imagen.classList.add('zoom-out');
-                }, 4000);
+                }, 8000);
               }, 500);
-            }, 4000);
+            }, 8000);
           }, 500);
-        }, 4000);
+        }, 8000);
       }, 2000);
     }
 
@@ -210,7 +210,7 @@
           window.location.href = `mejores.html?tienda=${encodeURIComponent(tienda)}`;
         }, 1200);
       }, 1000);
-    }, 80000);
+    }, 30000);
   </script>
 </body>
 </html>
