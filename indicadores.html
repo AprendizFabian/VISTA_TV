@@ -43,14 +43,12 @@ body{
   width:0;height:0;
   border-left:260px solid #000;
   border-bottom:190px solid transparent;
-  z-index:1;
 }
 .corner-yellow{
   position:absolute;bottom:0;right:0;
   width:0;height:0;
   border-right:220px solid #FFD60A;
   border-top:180px solid transparent;
-  z-index:1;
 }
 
 /* LOGO */
@@ -67,16 +65,13 @@ body{
   100%{transform:translateY(7px);}
 }
 .logo.hide{
-  transform:scale(0) translate(-50%,-50%);
+  transform:scale(0);
   opacity:0;
-  position:fixed;
-  top:50%;left:50%;
 }
 
 /* PANTALLA CARGA */
 .carga{
-  position:fixed;
-  inset:0;
+  position:fixed; inset:0;
   background:white;
   display:flex;
   justify-content:center;
@@ -97,27 +92,24 @@ body{
   pointer-events:none;
 }
 
-/* FADE DE SALIDA */
+/* FADE */
 .fade-overlay{
-  position:fixed;
-  inset:0;
+  position:fixed; inset:0;
   background:white;
   opacity:0;
-  transition:opacity 1s;
+  transition:1s;
   z-index:900;
 }
 .fade-overlay.activo{
   opacity:1;
 }
 
-/* CONTENEDOR PRINCIPAL */
 .content{
   opacity:0;
   transform:translateY(20px);
   transition:1s;
   width:100%;
   max-width:1500px;
-  z-index:10;
 }
 .content.visible{
   opacity:1;
@@ -133,7 +125,7 @@ body{
   box-shadow:0 10px 40px rgba(0,0,0,.25);
 }
 
-/* CINTA SUPERIOR */
+/* CINTA */
 .sheet-top{
   background:var(--lum-green-dark);
   color:#fff;
@@ -146,30 +138,24 @@ body{
 .sheet-title{
   font-size:38px;
   font-weight:800;
-  letter-spacing:1px;
 }
 .sheet-field{
   display:flex;
   gap:6px;
   align-items:center;
   margin-left:25px;
-}
-.sheet-field-label{
-  font-weight:700;
-  text-transform:uppercase;
+  font-size:18px;
 }
 .sheet-field-box{
   background:#f2fff5;
-  color:#111;
   padding:3px 12px;
   border-radius:2px;
   font-weight:600;
-  min-width:170px;
-  text-align:center;
-  font-size:17px;
+  font-size:18px;
+  color:#000 !important;   /* ← NOMBRE TIENDA & MES EN NEGRO */
 }
 
-/* TABLA PRINCIPAL */
+/* TABLA */
 .sheet-main{
   background:#f7fff8;
   padding:10px 12px 14px;
@@ -179,41 +165,26 @@ body{
   width:100%;
   border-collapse:collapse;
   table-layout:fixed;
-  font-size:18px;
+  font-size:20px;
 }
 
 .table-indicadores th,
 .table-indicadores td{
   border:1px solid #d4ead4;
-  padding:10px 8px;
+  padding:12px 10px;
 }
 
-/* HEAD */
 .table-indicadores thead th{
   background:#dfeee0;
-  color:#1f2933;
   font-weight:800;
-  text-align:center;
-  font-size:18px;
 }
 
-/* COLUMNA IZQUIERDA */
 .row-label{
   background:var(--lum-green);
-  color:#ffffff;
-  font-weight:700;
-  text-align:left;
-  font-size:20px;
+  color:white;
+  font-size:22px;
   padding-left:10px;
-  width:170px;
-}
-
-/* FILAS */
-.table-indicadores tbody tr:nth-child(odd){
-  background:#f4fff7;
-}
-.table-indicadores tbody tr:nth-child(even){
-  background:#e9f7eb;
+  width:180px;
 }
 
 .tr-meta{
@@ -223,24 +194,13 @@ body{
   background:#124d2b;
 }
 
-/* COLORES */
 .cell{
   font-weight:700;
-  text-align:center;
-  font-size:19px;
 }
-.cell-ok{
-  background:var(--ok-bg);
-  color:var(--ok-text);
-}
-.cell-warn{
-  background:var(--warn-bg);
-  color:var(--warn-text);
-}
-.cell-bad{
-  background:var(--bad-bg);
-  color:var(--bad-text);
-}
+
+.cell-ok{ background:var(--ok-bg); color:white; }
+.cell-warn{ background:var(--warn-bg); color:white; }
+.cell-bad{ background:var(--bad-bg); color:white; }
 </style>
 </head>
 
@@ -252,8 +212,8 @@ body{
 <div class="carga" id="pantallaCarga">
   <img src="img/carga.png">
 </div>
-<div class="fade-overlay" id="fadeOverlay"></div>
 
+<div class="fade-overlay" id="fadeOverlay"></div>
 
 <div class="content" id="mainContent">
 
@@ -261,13 +221,14 @@ body{
 
     <div class="sheet-top">
       <div class="sheet-title">INDICADORES</div>
+
       <div style="display:flex;">
         <div class="sheet-field">
-          <span class="sheet-field-label">DARKSTORE:</span>
+          <span>DARKSTORE:</span>
           <span class="sheet-field-box" id="campoDarkstore">—</span>
         </div>
         <div class="sheet-field">
-          <span class="sheet-field-label">MES:</span>
+          <span>MES:</span>
           <span class="sheet-field-box" id="campoMes">—</span>
         </div>
       </div>
@@ -292,41 +253,35 @@ body{
 </div>
 
 <script>
-
-const API_MES_PASADO = "https://proxy-eight-taupe-93.vercel.app/api/mesPasado.js";
-const API_MES_ACTUAL  = "https://proxy-eight-taupe-93.vercel.app/api/mesActual.js";
-const SHEET =
- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=1247726367&single=true&output=tsv";
-
-const tiendaURL = new URLSearchParams(location.search).get("tienda") || "";
+const API_MES_PASADO="https://proxy-eight-taupe-93.vercel.app/api/mesPasado.js";
+const API_MES_ACTUAL="https://proxy-eight-taupe-93.vercel.app/api/mesActual.js";
+const SHEET="https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=1247726367&single=true&output=tsv";
 
 const DURACION = 15000;
 
-const num = v => v==null||v==="" ? null : Number(v);
+// LEER TIENDA DESDE URL
+const tiendaURL = new URLSearchParams(window.location.search).get("tienda") ?? "";
 
-function parseMeta(v){
-  if(!v) return null;
-  return Number(v.replace(",","."));
-}
+const num = v => v==null||v===""?null:Number(v);
+const parseMeta = v => v ? Number(v.replace(",",".")) : null;
 
 function getMetas(tsv){
-  const rows = tsv.trim().split("\n").map(r=>r.split("\t"));
-  const f = rows[1];
-  return {
-    ordenes:null,
-    defect : parseMeta(f[3]),
-    instore: parseMeta(f[4])
+  const f = tsv.trim().split("\n").map(r=>r.split("\t"))[1];
+  return { 
+    defect : parseMeta(f[3]), 
+    instore: parseMeta(f[4]) 
   };
 }
 
 function metaClass(v,m){
-  if(v==null || m==null) return "";
+  if(v==null||m==null) return "";
   if(v<=m) return "cell-ok";
   if(v<=m*1.2) return "cell-warn";
   return "cell-bad";
 }
 
 async function cargarIndicadores(){
+
   const [p,a,m] = await Promise.all([
     fetch(API_MES_PASADO).then(r=>r.json()),
     fetch(API_MES_ACTUAL).then(r=>r.json()),
@@ -335,80 +290,62 @@ async function cargarIndicadores(){
 
   const metas = getMetas(m);
 
-  const rP = p?.query_result?.data?.rows?.[0];
-  const pasado = rP ? {
-    tienda:rP.Tienda,
-    ordenes:num(rP.Ordenes),
-    defect:num(rP.DefectRate),
-    instore:num(rP.InStoreTime)
-  }:null;
+  const rP = p.query_result.data.rows[0];
+  const pasado = {
+    tienda: rP.Tienda,
+    ordenes: num(rP.Ordenes),
+    defect : num(rP.DefectRate),
+    instore: num(rP.InStoreTime)
+  };
 
-  const semanas = (a?.query_result?.data?.rows || []).map((x,i)=>({
+  const semanas = a.query_result.data.rows.map((x,i)=>({
     etiqueta:`SEMANA ${i+1}`,
     ordenes:num(x.Ordenes),
     defect:num(x.DefectRate),
     instore:num(x.InStoreTime)
   }));
 
+  // Mostrar tienda
   document.getElementById("campoDarkstore").textContent =
-    tiendaURL || pasado?.tienda || semanas[0]?.tienda || "—";
+      tiendaURL !== "" ? tiendaURL : (pasado.tienda || "—");
 
+  // Mostrar mes actual
   document.getElementById("campoMes").textContent =
-    new Date().toLocaleString("es-CO",{month:"long"}).toUpperCase();
+    new Date().toLocaleString("es-CO",{ month:"long" }).toUpperCase();
 
-  let html="";
-
-  html+=`
+  let html = `
     <tr class="tr-meta">
-      <th class="row-label">METAS DEL MES</th>
+      <th class="row-label">METAS</th>
       <td class="cell">—</td>
-      <td class="cell">${metas.defect!=null? metas.defect+"%":"—"}</td>
-      <td class="cell">${metas.instore!=null? metas.instore+"m":"—"}</td>
+      <td class="cell">${metas.defect}%</td>
+      <td class="cell">${metas.instore}m</td>
     </tr>
   `;
 
-  if(pasado){
-    html+=`
-      <tr>
-        <th class="row-label">MES PASADO</th>
-        <td class="cell">${pasado.ordenes?.toLocaleString("es-CO") ?? "—"}</td>
-        <td class="cell ${metaClass(pasado.defect,metas.defect)}">${pasado.defect ?? "—"}%</td>
-        <td class="cell ${metaClass(pasado.instore,metas.instore)}">${pasado.instore ?? "—"}m</td>
-      </tr>
-    `;
-  }
+  html += `
+    <tr>
+      <th class="row-label">MES PASADO</th>
+      <td class="cell">${pasado.ordenes ?? "—"}</td>
+      <td class="cell ${metaClass(pasado.defect, metas.defect)}">${pasado.defect}%</td>
+      <td class="cell ${metaClass(pasado.instore, metas.instore)}">${pasado.instore}m</td>
+    </tr>
+  `;
 
   semanas.forEach(s=>{
-    html+=`
+    html += `
       <tr>
         <th class="row-label">${s.etiqueta}</th>
-        <td class="cell">${s.ordenes?.toLocaleString("es-CO") ?? "—"}</td>
-        <td class="cell ${metaClass(s.defect,metas.defect)}">${s.defect ?? "—"}%</td>
-        <td class="cell ${metaClass(s.instore,metas.instore)}">${s.instore ?? "—"}m</td>
+        <td class="cell">${s.ordenes ?? "—"}</td>
+        <td class="cell ${metaClass(s.defect, metas.defect)}">${s.defect}%</td>
+        <td class="cell ${metaClass(s.instore, metas.instore)}">${s.instore}m</td>
       </tr>
     `;
   });
-
-  if(semanas.length){
-    const tot = semanas.reduce((a,b)=>a+(b.ordenes||0),0);
-    const avgD = semanas.reduce((a,b)=>a+(b.defect||0),0)/semanas.length;
-    const avgI = semanas.reduce((a,b)=>a+(b.instore||0),0)/semanas.length;
-
-    html+=`
-      <tr>
-        <th class="row-label">TOTAL MES</th>
-        <td class="cell">${tot.toLocaleString("es-CO")}</td>
-        <td class="cell ${metaClass(avgD,metas.defect)}">${avgD.toFixed(2)}%</td>
-        <td class="cell ${metaClass(avgI,metas.instore)}">${avgI.toFixed(2)}m</td>
-      </tr>
-    `;
-  }
 
   document.getElementById("tablaBody").innerHTML = html;
 }
 
 function animarSalida(){
-  document.getElementById("logo").classList.add("hide");
   document.getElementById("fadeOverlay").classList.add("activo");
   setTimeout(()=>{
     location.href=`cumple.html?tienda=${encodeURIComponent(tiendaURL)}`;
@@ -419,9 +356,8 @@ window.addEventListener("load", async ()=>{
   await cargarIndicadores();
   document.getElementById("pantallaCarga").classList.add("oculta");
   document.getElementById("mainContent").classList.add("visible");
-  setTimeout(animarSalida,DURACION);
+  setTimeout(animarSalida, DURACION);
 });
-
 </script>
 
 </body>

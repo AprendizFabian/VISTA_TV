@@ -332,7 +332,7 @@ function animarSalida(){
 
 /* ===== FLUJO PRINCIPAL ===== */
 async function init(){
-  await new Promise(r=>setTimeout(r,1000));
+  await new Promise(r=>setTimeout(r,4000));
   document.getElementById("pantallaCarga").classList.add("oculta");
 
   const r1=await fetch(API_MEJORES).then(r=>r.json());
