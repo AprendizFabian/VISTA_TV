@@ -134,15 +134,26 @@
   <script>
     const SHEET_URL =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
-    const tienda = new URLSearchParams(window.location.search).get("tienda");
+
+    // Normalizar tienda (quita espacios, guiones, pone mayúsculas)
+    const NORMALIZAR = txt =>
+      txt?.toUpperCase().replace(/\s+/g, "").replace(/-/g, "") || "";
+
+    const tiendaBruta = new URLSearchParams(window.location.search).get("tienda");
+    const tienda = NORMALIZAR(tiendaBruta);
+
     const cont = document.getElementById("contenedor");
     const pantallaCarga = document.getElementById("pantallaCarga");
     const fadeOverlay = document.getElementById("fadeOverlay");
     const logo = document.getElementById("logo");
 
+    // RANGOS FINALES (FUNCIONANDO)
     const RANGOS = {
-      DS_SIERRA: { inicio: 3, fin: 20, columnas: [0, 1, 2] },
-      DS_CHAPINERO: { inicio: 3, fin: 20, columnas: [5, 6, 7] }
+      DSCHICO: { inicio: 3, fin: 20, columnas: [0, 1, 2] },
+      CHICO:   { inicio: 3, fin: 20, columnas: [0, 1, 2] },
+
+      DSCHAPINERO: { inicio: 3, fin: 20, columnas: [5, 6, 7] },
+      CHAPINERO:   { inicio: 3, fin: 20, columnas: [5, 6, 7] }
     };
 
     let index = 0, datos = [];
@@ -152,8 +163,9 @@
         const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
         const text = await res.text();
         const filas = text.trim().split("\n").map(f => f.split("\t"));
+
         const conf = RANGOS[tienda];
-        if (!conf) return siguientePantalla();
+        if (!conf) return animarSalida("empleado.html");
 
         datos = filas.slice(conf.inicio, conf.fin).map(f => ({
           nombre: f[conf.columnas[0]]?.trim(),
@@ -194,7 +206,7 @@
       setTimeout(() => {
         fadeOverlay.classList.add("activo");
         setTimeout(() => {
-          window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`;
+          window.location.href = `${destino}?tienda=${encodeURIComponent(tiendaBruta)}`;
         }, 1000);
       }, 1000);
     }

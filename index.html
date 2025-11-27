@@ -45,7 +45,6 @@
     const tienda = document.getElementById("tienda").value;
     if (!tienda) return alert("Por favor selecciona una tienda");
 
-    // Redirección explícita con ruta absoluta para mantener parámetros
     const base = window.location.origin + window.location.pathname.replace("index.html", "");
     window.location.href = base + `cumple.html?tienda=${encodeURIComponent(tienda)}`;
   }
