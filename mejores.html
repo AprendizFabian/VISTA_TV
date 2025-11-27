@@ -204,7 +204,7 @@ body{
   text-align:right;
 }
 
-/* ===== CONFETI (detrás) ===== */
+/* ===== CONFETI ===== */
 #confetti{
   position:fixed; inset:0;
   pointer-events:none;
@@ -216,6 +216,7 @@ body{
 <body>
 
 <div class="fade-overlay" id="fadeOverlay"></div>
+
 <div class="carga" id="pantallaCarga">
   <img src="img/carga.png">
 </div>
@@ -225,7 +226,7 @@ body{
 <div class="corner-black"></div>
 <div class="corner-yellow"></div>
 
-
+<img src="img/logo.png" id="logo" class="logo">
 
 <!-- ===== PANTALLA MEJORES ===== -->
 <div class="pantalla" id="pantalla1">
@@ -246,16 +247,17 @@ body{
 const API_MEJORES="https://proxy-eight-taupe-93.vercel.app/api/topMejores.js";
 const API_PEORES ="https://proxy-eight-taupe-93.vercel.app/api/topPeores.js";
 
-/* ===== LEER TIENDA ===== */
+/* ===== TIENDA ===== */
 const tienda = new URLSearchParams(window.location.search).get("tienda");
 
-/* ===== CONFETI SOLO EN MEJORES ===== */
+/* ===== CONFETI ===== */
 function confettiBoom(){
   const c=document.getElementById("confetti");
   const ctx=c.getContext("2d");
-  c.width=innerWidth; c.height=innerHeight;
+  c.width=innerWidth; 
+  c.height=innerHeight;
 
-  const parts=[...Array(80)].map(()=>({
+  const parts=[...Array(80)].map(() => ({
     x:Math.random()*c.width,
     y:Math.random()*-c.height,
     size:4+Math.random()*4,
@@ -277,14 +279,23 @@ function confettiBoom(){
 
 /* Utilidades */
 const pick=(o,k)=>k.map(x=>o[x]).find(v=>v!=null);
-const normalize=r=>r.map(a=>({
-  picker:pick(a,["Picker","picker_name","picker"]),
-  ordenes:+pick(a,["Ordenes","orders","count"]),
-  tiempo:+pick(a,["InStoreTime","in_store"])
-}));
+
+const normalize=r=>{
+  if(!Array.isArray(r)) return [];
+  return r.map(a=>({
+    picker : pick(a,["Picker","picker_name","picker"]) || "Sin nombre",
+    ordenes: Number(pick(a,["Ordenes","orders","count"])) || 0,
+    tiempo : Number(pick(a,["InStoreTime","in_store"])) || 0
+  }));
+};
 
 /* Render */
 function render(target,data,tipo){
+  if(!data.length){
+    target.innerHTML = `<div class="row"><div>No hay datos</div></div>`;
+    return;
+  }
+
   target.innerHTML=data.map((x,i)=>`
     <div class="row">
       <div class="medal ${["g1","g2","g3"][i]||"gx"}">${i+1}</div>
@@ -303,68 +314,73 @@ function render(target,data,tipo){
     </div>
   `).join("");
 
-  const maxOrd=Math.max(...data.map(d=>d.ordenes));
-  const maxTime=Math.max(...data.map(d=>d.tiempo));
+  const maxOrd = Math.max(...data.map(d=>d.ordenes),1);
+  const maxTime = Math.max(...data.map(d=>d.tiempo),1);
 
   requestAnimationFrame(()=>{
     [...target.querySelectorAll(".row")].forEach((row,i)=>{
       const d=data[i];
+      if(!d) return;
       row.querySelectorAll(".bar i")[0].style.width=(d.ordenes/maxOrd*100)+"%";
       row.querySelectorAll(".bar i")[1].style.width=(d.tiempo/maxTime*100)+"%";
     });
   });
 }
 
-/* ===== ANIMACIÓN SALIDA ===== */
+/* ===== ANIMACIÓN DE SALIDA — FIXEADA ===== */
 function animarSalida(){
   const logo=document.getElementById("logo");
   const fade=document.getElementById("fadeOverlay");
 
-  logo.classList.add("hide");
+  if(logo) logo.classList.add("hide");
+  if(fade){
+    setTimeout(()=> fade.classList.add("activo"),300);
+  }
 
   setTimeout(()=>{
-    fade.classList.add("activo");
-    setTimeout(()=>{
-      window.location.href=`indicadores.html?tienda=${encodeURIComponent(tienda)}`;
-    },1000);
-  },900);
+    window.location.href=`indicadores.html?tienda=${encodeURIComponent(tienda)}`;
+  },1500);
 }
 
 /* ===== FLUJO PRINCIPAL ===== */
 async function init(){
-  await new Promise(r=>setTimeout(r,4000));
+  await new Promise(r=>setTimeout(r,3000));
   document.getElementById("pantallaCarga").classList.add("oculta");
 
-  const r1=await fetch(API_MEJORES).then(r=>r.json());
-  const r2=await fetch(API_PEORES).then(r=>r.json());
+  let mejores=[], peores=[];
 
-  const mejores=normalize(r1.query_result.data.rows);
-  const peores =normalize(r2.query_result.data.rows);
+  try{
+    const r1 = await fetch(API_MEJORES).then(r=>r.json());
+    const r2 = await fetch(API_PEORES).then(r=>r.json());
+
+    mejores = normalize(r1?.query_result?.data?.rows);
+    peores  = normalize(r2?.query_result?.data?.rows);
+  }catch(err){
+    console.error("Error APIs:", err);
+  }
+
+  if(!mejores.length) mejores=[{picker:"Sin datos",ordenes:0,tiempo:0}];
+  if(!peores.length)  peores=[{picker:"Sin datos",ordenes:0,tiempo:0}];
 
   const p1=document.getElementById("pantalla1");
   const p2=document.getElementById("pantalla2");
 
-  /* Mostrar pantalla 1 */
   p1.classList.add("visible");
   render(document.getElementById("boardMejores"),mejores,"mejor");
   confettiBoom();
 
-  /* Cambio a pantalla 2 */
   setTimeout(()=>{
     document.getElementById("confetti").style.display="none";
     p1.classList.remove("visible");
     p2.classList.add("visible");
     render(document.getElementById("boardPeores"),peores,"peor");
 
-    /* Salida → indicadores */
-    setTimeout(()=>{ animarSalida(); },9000);
+    setTimeout(animarSalida,9000);
 
   },11000);
 }
 
 init();
 </script>
-
-
 </body>
 </html>

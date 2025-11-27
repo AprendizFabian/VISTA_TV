@@ -117,7 +117,9 @@
   </style>
 </head>
 <body>
+
   <div class="fade-overlay" id="fadeOverlay"></div>
+
   <div class="carga" id="pantallaCarga">
     <img src="img/carga.png" alt="Cargando...">
   </div>
@@ -126,6 +128,7 @@
   <div class="corner-black"></div>
   <div class="corner-yellow"></div>
   <img src="img/logo.png" alt="Logo LUM" class="logo" id="logo">
+
   <div class="card" id="contenedor">
     <h1 class="title">🎂 ¡Feliz Cumpleaños!</h1>
     <p>Cargando...</p>
@@ -135,9 +138,12 @@
     const SHEET_URL =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
 
-    // Normalizar tienda (quita espacios, guiones, pone mayúsculas)
+    // Normaliza todo: quita espacios, -, _ y mayúsculas
     const NORMALIZAR = txt =>
-      txt?.toUpperCase().replace(/\s+/g, "").replace(/-/g, "") || "";
+      txt?.toUpperCase()
+         .replace(/\s+/g, "")
+         .replace(/-/g, "")
+         .replace(/_/g, "") || "";
 
     const tiendaBruta = new URLSearchParams(window.location.search).get("tienda");
     const tienda = NORMALIZAR(tiendaBruta);
@@ -147,7 +153,7 @@
     const fadeOverlay = document.getElementById("fadeOverlay");
     const logo = document.getElementById("logo");
 
-    // RANGOS FINALES (FUNCIONANDO)
+    // RANGOS DEFINITIVOS
     const RANGOS = {
       DSCHICO: { inicio: 3, fin: 20, columnas: [0, 1, 2] },
       CHICO:   { inicio: 3, fin: 20, columnas: [0, 1, 2] },
@@ -167,6 +173,7 @@
         const conf = RANGOS[tienda];
         if (!conf) return animarSalida("empleado.html");
 
+        // Carga de datos
         datos = filas.slice(conf.inicio, conf.fin).map(f => ({
           nombre: f[conf.columnas[0]]?.trim(),
           mensaje: f[conf.columnas[1]]?.trim(),
@@ -182,7 +189,7 @@
             setTimeout(() => animarSalida("empleado.html"), 1500);
           }
         }, 2000);
-      } catch {
+      } catch (e) {
         setTimeout(() => animarSalida("empleado.html"), 1500);
       }
     }
@@ -194,6 +201,7 @@
         <h1 class="title">🎂 ¡Feliz Cumpleaños!</h1>
         <div class="nombre">${c.nombre}</div>
         <div class="mensaje">${c.mensaje}</div>`;
+
       lanzarConfeti();
 
       index++;
@@ -223,6 +231,7 @@
         d: Math.random() * 20 + 10,
         color: `hsl(${Math.random() * 60 + 40},100%,50%)`
       }));
+
       (function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (const o of p) {
@@ -238,5 +247,6 @@
 
     cargarDatos();
   </script>
+
 </body>
 </html>
