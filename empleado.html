@@ -4,231 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Empleado del Mes - LUM</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      overflow: hidden;
-      color: #111;
-      position: relative;
-    }
 
-    .corner-black {
-      position: absolute; top: 0; left: 0;
-      width: 0; height: 0;
-      border-left: 280px solid #000;
-      border-bottom: 230px solid transparent;
-      z-index: 1;
-    }
-    .corner-yellow {
-      position: absolute; bottom: 0; right: 0;
-      width: 0; height: 0;
-      border-right: 200px solid #FFD60A;
-      border-top: 180px solid transparent;
-      z-index: 1;
-    }
-
-    .logo {
-      position: absolute;
-      top: 30px; left: 40px;
-      width: 100px;
-      animation: floatLogo 3s ease-in-out infinite alternate;
-      z-index: 5;
-      transition: transform 1s ease, opacity 1s ease;
-    }
-    @keyframes floatLogo { 
-      0% { transform: translateY(0); } 
-      100% { transform: translateY(6px); } 
-    }
-
-    .logo.hide {
-      transform: scale(0) translate(-50%, -50%);
-      opacity: 0;
-      position: fixed;
-      top: 50%; left: 50%;
-    }
-
-    .container {
-      text-align: center;
-      z-index: 5;
-      opacity: 0;
-      transform: translateY(40px);
-      transition: all 1.2s ease;
-    }
-    .container.visible { opacity: 1; transform: translateY(0); }
-
-    .title {
-      font-size: 2.6rem;
-      font-weight: 700;
-      color: #FFD60A;
-      text-shadow: 0 0 10px rgba(255,214,10,0.4);
-    }
-    .photo {
-      width: 240px; height: 240px; border-radius: 50%;
-      object-fit: cover;
-      border: 6px solid #FFD60A;
-      box-shadow: 0 0 30px rgba(255,214,10,0.4);
-      animation: floatImg 4s ease-in-out infinite;
-    }
-    @keyframes floatImg {
-      0%,100%{ transform: translateY(0); }
-      50%{ transform: translateY(-8px); }
-    }
-
-    .nombre { font-size: 2rem; font-weight: 700; margin-top: 25px; }
-    .mensaje { font-size: 1.2rem; color: #555; font-style: italic; margin-top: 8px; }
-
-    canvas#confetti {
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none; z-index: 0;
-    }
-
-    .carga {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 1;
-      transition: opacity 1s ease;
-    }
-    .carga img {
-      width: 350px;
-      max-width: 80%;
-      animation: aparecer 2s ease;
-    }
-    @keyframes aparecer {
-      0% { opacity: 0; transform: scale(0.9); }
-      50% { opacity: 1; transform: scale(1.05); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    .carga.oculta { opacity: 0; pointer-events: none; }
-
-    .fade-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: #fff;
-      opacity: 0;
-      z-index: 9999;
-      pointer-events: none;
-      transition: opacity 1s ease;
-    }
-    .fade-overlay.activo { opacity: 1; }
-  </style>
+  <link rel="stylesheet" href="css/empleado.css">
 </head>
+
 <body>
   <div class="fade-overlay" id="fadeOverlay"></div>
+
   <div class="carga" id="pantallaCarga">
     <img src="img/carga.png" alt="Cargando...">
   </div>
 
   <canvas id="confetti"></canvas>
+
   <div class="corner-black"></div>
   <div class="corner-yellow"></div>
+
   <img src="img/logo.png" alt="Logo LUM" class="logo" id="logo">
+
   <div class="container" id="contenedor"></div>
 
-  <script>
-    const SHEET_URL =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSUqiPVe2z89H6Gum_WF-13kMUpXse9-epmDlqkurHE9DFp_zUKt1dT4ptzyLfsi3SM8fTXf-AmJvea/pub?gid=0&single=true&output=tsv";
-    const tienda = new URLSearchParams(window.location.search).get("tienda");
-    const cont = document.getElementById("contenedor");
-    const pantallaCarga = document.getElementById("pantallaCarga");
-    const fadeOverlay = document.getElementById("fadeOverlay");
-
-    const RANGOS = {
-      DS_CHICO: { filaEmpleado: 23, columnas: [0, 1, 2] },
-      DS_CHAPINERO: { filaEmpleado: 23, columnas: [5, 6, 7] }
-    };
-
-    async function cargarEmpleado() {
-      try {
-        const res = await fetch(`${SHEET_URL}&nocache=${Date.now()}`);
-        const text = await res.text();
-        const filas = text.trim().split("\n").map(f => f.split("\t"));
-        const conf = RANGOS[tienda];
-        if (!conf) return saltoRapido();
-
-        const fila = filas[conf.filaEmpleado] || [];
-        const nombre = (fila[conf.columnas[0]] || "").trim();
-        const mensaje = (fila[conf.columnas[1]] || "").trim();
-        const imagen = (fila[conf.columnas[2]] || "").trim();
-
-        // Si no hay ningún valor real, salta sin mostrar nada
-        if (![nombre, mensaje, imagen].some(v => v && v.length > 0)) {
-          return saltoRapido();
-        }
-
-        // Si hay datos válidos, muestra
-        pantallaCarga.classList.add("oculta");
-        cont.classList.add("visible");
-        cont.innerHTML = `
-          <h1 class="title">🏆 Empleado del Mes</h1>
-          ${imagen ? `<img src="${imagen}" alt="${nombre || 'Empleado'}" class="photo">` : ""}
-          ${nombre ? `<div class="nombre">${nombre}</div>` : ""}
-          <div class="mensaje">${mensaje || "Por su excelente desempeño"}</div>
-        `;
-        lanzarConfeti();
-
-        setTimeout(() => animarSalida("motivacional.html"), 30000);
-      } catch {
-        saltoRapido();
-      }
-    }
-
-    function saltoRapido() {
-      // Mantiene la pantalla de carga → fade blanco → redirección
-      setTimeout(() => {
-        fadeOverlay.classList.add("activo");
-        setTimeout(() => {
-          window.location.href = `motivacional.html?tienda=${encodeURIComponent(tienda)}`;
-        }, 900);
-      }, 300);
-    }
-
-    function animarSalida(destino) {
-      fadeOverlay.classList.add("activo");
-      setTimeout(() => {
-        window.location.href = `${destino}?tienda=${encodeURIComponent(tienda)}`;
-      }, 1000);
-    }
-
-    function lanzarConfeti() {
-      const canvas = document.getElementById("confetti");
-      const ctx = canvas.getContext("2d");
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      const p = Array.from({ length: 60 }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * -canvas.height,
-        r: Math.random() * 6 + 2,
-        d: Math.random() * 20 + 10,
-        color: `hsl(${Math.random() * 60 + 40}, 100%, 50%)`
-      }));
-      (function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (const o of p) {
-          ctx.fillStyle = o.color;
-          ctx.fillRect(o.x, o.y, o.r, o.r);
-          o.y += Math.cos(o.d) + 2;
-          o.x += Math.sin(o.d);
-          if (o.y > canvas.height) o.y = 0;
-        }
-        requestAnimationFrame(draw);
-      })();
-    }
-
-    cargarEmpleado();
-  </script>
+  <script src="js/empleado.js"></script>
 </body>
 </html>
