@@ -1,23 +1,70 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Seleccionar Tienda - LUM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- TU CSS BASE -->
   <link rel="stylesheet" href="css/styles.css">
+
+  <!-- CSS DEL COMBO (OBLIGATORIO) -->
+  <style>
+    .combo {
+      position: relative;
+      width: 300px;
+    }
+
+    .combo input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    .combo-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      background: #fff;
+      display: none;
+      z-index: 9999;
+    }
+
+    .combo-list div {
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .combo-list div:hover {
+      background: #f0f0f0;
+    }
+  </style>
 </head>
 
 <body>
+
   <h1>🎉 Pantalla Informativa - Selecciona tu tienda</h1>
 
-  <select id="tienda">
-    <option value="">-- Elegir Tienda --</option>
-    <option value="DS_CHICO">DS Chico</option>
-    <option value="DS_CHAPINERO">DS Chapinero</option>
-  </select>
+  <!-- 🔥 EL “GRAN SELECT” -->
+  <div class="combo">
+    <input
+      type="text"
+      id="tiendaInput"
+      placeholder="Buscar tienda..."
+      autocomplete="off"
+    >
+    <div id="listaTiendas" class="combo-list"></div>
+  </div>
+
+  <br>
 
   <button id="btnIngresar">Ingresar</button>
 
+  <!-- JS -->
   <script src="js/app.js"></script>
 </body>
 </html>

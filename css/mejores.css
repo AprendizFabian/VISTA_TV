@@ -1,0 +1,188 @@
+:root{
+  --lum-yellow:#FFD60A;
+  --lum-black:#414242;
+  --lum-red:#FF5C5C;
+}
+
+/* RESET */
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:"Poppins",sans-serif;
+  background:#f5f5f5;
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+}
+
+/* ===== CORNER DESIGN ===== */
+.corner-black{
+  position:absolute;top:0;left:0;
+  border-left:260px solid var(--lum-black);
+  border-bottom:210px solid transparent;
+  z-index:3;
+}
+.corner-yellow{
+  position:absolute;bottom:0;right:0;
+  border-right:220px solid var(--lum-yellow);
+  border-top:190px solid transparent;
+  z-index:1;
+}
+
+/* ===== LOGO ===== */
+.logo{
+  position:absolute;
+  top:20px;left:20px;
+  width:80px;
+  z-index:20;
+  animation:floatLogo 3s ease-in-out infinite alternate;
+  transition:transform 1s ease, opacity 1s ease;
+}
+@keyframes floatLogo{0%{transform:translateY(0);}100%{transform:translateY(6px);}}
+
+/* ===== LOADING ===== */
+.carga{
+  position:fixed;inset:0;
+  background:white;
+  display:flex;align-items:center;justify-content:center;
+  z-index:3000;
+  transition:opacity 1s ease;
+}
+.carga img{width:300px;}
+.carga.oculta{opacity:0;pointer-events:none;}
+
+/* Fade de salida */
+.fade-overlay{
+  position:fixed;inset:0;
+  background:white;
+  opacity:0;
+  z-index:2500;
+  pointer-events:none;
+  transition:opacity 1.2s ease;
+}
+.fade-overlay.activo{opacity:1;}
+
+/* ===== PANTALLAS ===== */
+.pantalla{
+  width:100%;
+  max-width:1080px;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  opacity:0;
+  transform:translateY(20px);
+  transition:opacity .7s ease,transform .7s ease;
+  z-index:10;
+}
+.pantalla.visible{
+  display:flex;
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* ===== TITULOS ===== */
+.title{
+  font-size:46px;
+  font-weight:700;
+  text-align:center;
+  color:var(--lum-yellow);
+}
+.subtitle{
+  text-align:center;
+  font-size:22px;
+  color:#333;
+}
+
+/* ===== TABLA ===== */
+.board{
+  width:100%;
+  background:white;
+  border-radius:22px;
+  padding:20px 25px;
+  border:1px solid #ddd;
+  box-shadow:0 12px 40px rgba(0,0,0,.15);
+}
+
+/* FILAS */
+.row{
+  display:grid;
+  grid-template-columns: 75px 2fr 1.3fr 1.3fr 1fr;
+  align-items:center;
+  padding:18px 0;
+  border-bottom:1px solid #eee;
+  font-size:24px;
+  opacity:0;
+  transform:translateX(-20px);
+  animation:slideIn .5s forwards;
+}
+.row:last-child{border-bottom:none;}
+
+@keyframes slideIn{
+  to{opacity:1;transform:translateX(0);}
+}
+
+/* ===== MEDALLAS ===== */
+.medal{
+  width:60px;height:60px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:700;
+  border:3px solid white;
+}
+.g1{background:#ffe27a;}
+.g2{background:#e2e2e2;}
+.g3{background:#f0b77f;}
+
+.gray-all .medal{
+  background:#cfcfcf !important;
+  color:#444;
+}
+
+/* ===== TEXTO ===== */
+.picker{
+  font-size:26px;font-weight:600;color:#111;
+  white-space:nowrap;
+}
+
+.metric{
+  display:flex;align-items:center;gap:10px;
+}
+
+.pill{
+  padding:6px 14px;
+  border-radius:999px;
+  background:#eee;
+  font-size:18px;
+}
+
+.bar{
+  flex:1;
+  height:14px;background:#eee;
+  border-radius:999px;overflow:hidden;
+  position:relative;
+}
+.bar i{
+  position:absolute;left:0;top:0;bottom:0;width:0%;
+  transition:width 1.2s ease;
+}
+
+.bar-ordenes i{background:#53d37a;}
+.bar-tiempo i{background:#FFD60A;}
+.bar-malo i{background:#FF5C5C;}
+
+.tiny{
+  width:65px;
+  font-size:18px;
+  font-weight:600;
+  text-align:right;
+}
+
+/* CONFETI */
+#confetti{
+  position:fixed; inset:0;
+  pointer-events:none;
+  z-index:2; 
+}
